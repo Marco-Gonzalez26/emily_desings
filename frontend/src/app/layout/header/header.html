@@ -1,0 +1,110 @@
+<header
+  class="py-4 px-6 md:px-8 flex items-center fixed top-0 w-full justify-between z-40 transition-colors bg-white border-b border-neutral-100"
+  id="landingHeader"
+  #landingHeader
+>
+  <div class="flex grow basis-0">
+    <a href="">
+      <span class="text-2xl font-bold text-neutral-800 font-family-serif">EmilyDesings</span>
+    </a>
+  </div>
+
+  <nav>
+    <ul
+      class="text-sm [&>li>a]:text-current [&>li>a]:font-medium [&>li>a]:inline-block [&>li>a]:px-4 [&>li>a]:py-2 hidden lg:flex"
+    >
+      <li
+        *ngFor="let link of links()"
+        (mouseenter)="onMouseEnter($event)"
+        (mouseleave)="onMouseLeave()"
+      >
+        <a [routerLink]="link.href">{{ link.name }}</a>
+      </li>
+    </ul>
+  </nav>
+
+  <nav class="hidden lg:flex grow basis-0 justify-end">
+    <ul
+      class="text-sm [&>li>a]:font-medium [&>li>a]:text-current [&>li>a]:inline-block [&>li>a]:px-4 [&>li>a]:py-2 flex"
+    >
+      <li>
+        <a href="" class="hover:opacity-70 transition-opacity">
+          <ng-icon name="jamShoppingCart" size="22"></ng-icon>
+        </a>
+      </li>
+      <li>
+        <a href="" class="hover:opacity-70 transition-opacity">
+          <ng-icon name="jamUser" size="22"></ng-icon>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <nav class="flex lg:hidden items-center gap-4">
+    <a href="" class="hover:opacity-70 transition-opacity">
+      <ng-icon name="jamShoppingCart" size="22"></ng-icon>
+    </a>
+
+    <button
+      (click)="toggleMobileMenu()"
+      class="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+      [attr.aria-label]="mobileMenuOpen() ? 'Cerrar menú' : 'Abrir menú'"
+    >
+      <ng-icon [name]="mobileMenuOpen() ? 'jamClose' : 'jamMenu'" size="24"></ng-icon>
+    </button>
+  </nav>
+
+  <div
+    #mobileOverlay
+    class="fixed inset-0 bg-black/20 backdrop-blur-sm lg:hidden z-40"
+    (click)="toggleMobileMenu()"
+  ></div>
+
+  <div
+    #mobileMenu
+    class="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl lg:hidden z-50"
+  >
+    <div class="flex flex-col h-full">
+
+      <div class="flex items-center justify-between p-6 border-b border-neutral-100">
+        <span class="text-xl font-bold text-neutral-800 font-family-serif">Menú</span>
+        <button
+          (click)="toggleMobileMenu()"
+          class="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+        >
+          <ng-icon name="jamClose" size="24"></ng-icon>
+        </button>
+      </div>
+
+      <nav class="flex-1 overflow-y-auto overflow-x-hidden">
+        <ul class="py-4">
+          <li *ngFor="let link of links()">
+            <a
+              [routerLink]="link.href"
+              (click)="toggleMobileMenu()"
+              class="block px-6 py-4 text-base font-medium text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors border-b border-neutral-50"
+            >
+              {{ link.name }}
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="p-6 border-t border-neutral-100">
+        <a
+          href=""
+          class="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 rounded-lg transition-colors"
+        >
+          <ng-icon name="jamUser" size="20"></ng-icon>
+          <span class="font-medium">Mi cuenta</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div
+    #menuBackdrop
+    id="menu-backdrop"
+    class="absolute bg-black/5 backdrop-blur-lg rounded translate-x-(--left) translate-y-(--top) w-(--width) h-(--height) transition-all duration-300 ease-in-out opacity-0 -z-10 top-0 left-0"
+  ></div>
+</header>
