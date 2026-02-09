@@ -34,7 +34,7 @@ Emily Designs es una plataforma de e-commerce desarrollada para mejorar la exper
 
 ### Servicios Adicionales
 - **Almacenamiento de Imágenes**: Cloudinary
-- **Pasarela de Pagos**: Por definir
+- **Pasarela de Pagos**: Stripe
 - **Autenticación**: JWT
 
 ## ✨ Características Principales
@@ -76,4 +76,5 @@ emily-designs/
 ├── frontend/          # Aplicación Angular
 ├── backend/           # API REST con FastAPI
 ```
+
 
