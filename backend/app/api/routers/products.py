@@ -21,7 +21,7 @@ from app.schemas.schemas import (
 )
 from app.services import product_service
 
-# Crear router
+
 router = APIRouter(prefix="/api/productos", tags=["Productos"])
 
 

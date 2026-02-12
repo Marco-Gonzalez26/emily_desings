@@ -1,9 +1,4 @@
-"""
-Servicio de productos
-Maneja la lógica de negocio para CRUD de productos
-"""
-
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_, and_
 from fastapi import HTTPException, status
 from uuid import UUID
@@ -28,7 +23,12 @@ def get_producto_by_id(db: Session, producto_id: UUID) -> Producto:
     Raises:
         HTTPException: Si el producto no existe
     """
-    producto = db.query(Producto).filter(Producto.id == producto_id).first()
+    producto = (
+        db.query(Producto)
+        .options(joinedload(Producto.imagenes))
+        .filter(Producto.id == producto_id)
+        .first()
+    )
 
     if not producto:
         raise HTTPException(
@@ -78,7 +78,10 @@ def get_productos(
     Returns:
         Tupla con (lista de productos, total de registros)
     """
-    query = db.query(Producto)
+    query = (
+        db.query(Producto)
+        .options(joinedload(Producto.imagenes))
+    )
 
     # Aplicar filtros
     if activo is not None:
@@ -269,6 +272,7 @@ def get_productos_destacados(db: Session, limit: int = 10) -> List[Producto]:
     """Obtener productos destacados"""
     return (
         db.query(Producto)
+        .options(joinedload(Producto.imagenes))
         .filter(Producto.es_destacado == True, Producto.activo == True)
         .limit(limit)
         .all()
@@ -279,6 +283,7 @@ def get_productos_nuevos(db: Session, limit: int = 10) -> List[Producto]:
     """Obtener productos nuevos"""
     return (
         db.query(Producto)
+        .options(joinedload(Producto.imagenes))
         .filter(Producto.es_nuevo == True, Producto.activo == True)
         .order_by(Producto.fecha_creacion.desc())
         .limit(limit)
@@ -290,6 +295,7 @@ def get_productos_en_oferta(db: Session, limit: int = 10) -> List[Producto]:
     """Obtener productos en oferta"""
     return (
         db.query(Producto)
+        .options(joinedload(Producto.imagenes))
         .filter(
             Producto.es_oferta == True,
             Producto.activo == True,

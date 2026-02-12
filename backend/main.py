@@ -1,8 +1,6 @@
 from fastapi import FastAPI
-from app.api.routers import auth
-from app.api.routers import products
-from app.api.routers import catalog
-from app.api.routers import orders
+from app.api.routers import auth, products, catalog, orders, categories, brands
+
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.config import check_db_connection
 
@@ -26,7 +24,8 @@ app.include_router(auth.router)
 app.include_router(products.router)
 app.include_router(catalog.router)
 app.include_router(orders.router)
-
+app.include_router(categories.router)
+app.include_router(brands.router)
 # app.include_router(usuarios.router, prefix="/api/usuarios", tags=["usuarios"])
 # app.include_router(productos.router, prefix="/api/productos", tags=["productos"])
 # app.include_router(carritos.router, prefix="/api/carritos", tags=["carritos"])

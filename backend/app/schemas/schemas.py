@@ -51,6 +51,8 @@ class ProductoBase(BaseModel):
     sku: str
     nombre: str
     descripcion: Optional[str] = None
+    precio_regular: Decimal = Field(..., gt=0)
+    precio_descuento: Optional[Decimal] = None
 
     @field_validator("precio_descuento")
     @classmethod
@@ -60,7 +62,6 @@ class ProductoBase(BaseModel):
             raise ValueError("precio_descuento debe ser menor al precio_regular")
         return v
 
-    precio_descuento: Optional[Decimal] = None
     categoria_id: Optional[UUID] = None
     marca_id: Optional[UUID] = None
     es_nuevo: bool = False
@@ -107,7 +108,7 @@ class ProductoResponse(ProductoBase):
     fecha_creacion: datetime
     created_at: datetime
     updated_at: datetime
-
+    imagenes: List[ImagenProductoResponse] = []
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -312,11 +313,13 @@ class CategoriaCreate(CategoriaBase):
 
     pass
 
+
 class CategoriaUpdate(BaseModel):
     nombre: Optional[str] = None
     descripcion: Optional[str] = None
     activo: Optional[bool] = None
-    
+
+
 class CategoriaResponse(CategoriaBase):
     """Esquema de respuesta de categoría"""
 
@@ -340,10 +343,12 @@ class MarcaCreate(MarcaBase):
 
     pass
 
+
 class MarcaUpdate(BaseModel):
     nombre: Optional[str] = Field(None, min_length=2, max_length=100)
     descripcion: Optional[str] = Field(None, max_length=255)
     activo: Optional[bool] = None
+
 
 class MarcaResponse(MarcaBase):
     """Esquema de respuesta de marca"""

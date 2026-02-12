@@ -1,14 +1,15 @@
-import { Component, signal, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, signal, ViewChild, ElementRef, AfterViewInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { provideIcons, NgIconComponent } from '@ng-icons/core';
-import { jamShoppingCart, jamUser, jamMenu, jamClose } from '@ng-icons/jam-icons';
+import { jamShoppingCart, jamUser, jamMenu, jamClose, jamLogOut } from '@ng-icons/jam-icons';
 import { RouterLink } from '@angular/router';
 import { gsap } from 'gsap';
+import { AuthService } from '../../core/services/auth';
 
 @Component({
   selector: 'app-header',
   imports: [CommonModule, NgIconComponent, RouterLink],
-  providers: [provideIcons({ jamShoppingCart, jamUser, jamMenu, jamClose })],
+  providers: [provideIcons({ jamShoppingCart, jamUser, jamMenu, jamClose, jamLogOut })],
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
@@ -22,13 +23,17 @@ export class Header implements AfterViewInit {
 
   protected readonly links = signal([
     { name: 'Inicio', href: '' },
-    // { name: 'Catálogo', href: 'catalogo' },
+    { name: 'Catálogo', href: 'catalogo' },
     { name: 'Análisis morfológico', href: 'analisis-morfologico' },
     { name: 'Sobre Nosotros', href: 'sobre-nosotros' },
   ]);
 
+  protected readonly isAuthenticated = computed(() => this.authService.isAuthenticated());
+  protected readonly currentUser = computed(() => this.authService.currentUser());
+
+  constructor(private authService: AuthService) {}
+
   ngAfterViewInit(): void {
-    // Configuración inicial del menú móvil (oculto)
     if (this.mobileMenu) {
       gsap.set(this.mobileMenu.nativeElement, { x: '100%' });
     }
@@ -46,6 +51,11 @@ export class Header implements AfterViewInit {
     } else {
       this.closeMobileMenu();
     }
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.closeMobileMenu();
   }
 
   private openMobileMenu(): void {

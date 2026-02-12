@@ -6,6 +6,7 @@ import { LoginComponent } from './features/auth/login/login';
 import { AuthLayoutComponent } from './layout/auth/auth';
 import { AppLayoutComponent } from './layout/app/app';
 import { RegisterComponent } from './features/auth/register/register';
+import { ProductListComponent } from './features/catalog/product-list/product-list';
 
 export const routes: Routes = [
   {
@@ -15,6 +16,7 @@ export const routes: Routes = [
       { path: '', component: HomeComponent },
       { path: 'analisis-morfologico', component: MorphologyAnalysisComponent },
       { path: 'sobre-nosotros', component: AboutUsComponent },
+      { path: 'catalogo', component: ProductListComponent },
     ],
   },
   {
@@ -26,5 +28,5 @@ export const routes: Routes = [
     path: 'crear-cuenta',
     component: AuthLayoutComponent,
     children: [{ path: '', component: RegisterComponent }],
-  }
+  },
 ];

@@ -1,7 +1,3 @@
-"""
-Servicio de marcas
-"""
-
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from uuid import UUID

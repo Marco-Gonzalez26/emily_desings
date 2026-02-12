@@ -4,8 +4,8 @@
   #landingHeader
 >
   <div class="flex grow basis-0">
-    <a href="">
-      <span class="text-2xl font-bold text-neutral-800 font-family-serif">EmilyDesings</span>
+    <a routerLink="/">
+      <span class="text-2xl font-bold text-emily-dark font-family-serif">EmilyDesings</span>
     </a>
   </div>
 
@@ -25,15 +25,25 @@
 
   <nav class="hidden lg:flex grow basis-0 justify-end">
     <ul
-      class="text-sm [&>li>a]:font-medium [&>li>a]:text-current [&>li>a]:inline-block [&>li>a]:px-4 [&>li>a]:py-2 flex"
+      class="text-sm [&>li>a]:font-medium [&>li>a]:text-current [&>li>a]:inline-block [&>li>a]:px-4 [&>li>a]:py-2 flex items-center"
     >
       <li>
-        <a href="" class="hover:opacity-70 transition-opacity">
+        <a routerLink="/carrito" class="hover:opacity-70 transition-opacity">
           <ng-icon name="jamShoppingCart" size="22"></ng-icon>
         </a>
       </li>
-      <li>
-        <a href="" class="hover:opacity-70 transition-opacity">
+
+      <li *ngIf="!isAuthenticated()">
+        <a
+          routerLink="/iniciar-sesion"
+          class="bg-emily-rose hover:bg-emily-rose/90 text-emily-white! px-4 py-2 rounded-lg transition t"
+        >
+          Iniciar sesión
+        </a>
+      </li>
+
+      <li *ngIf="isAuthenticated()">
+        <a routerLink="/perfil" class="hover:opacity-70 transition-opacity">
           <ng-icon name="jamUser" size="22"></ng-icon>
         </a>
       </li>
@@ -41,7 +51,7 @@
   </nav>
 
   <nav class="flex lg:hidden items-center gap-4">
-    <a href="" class="hover:opacity-70 transition-opacity">
+    <a routerLink="/carrito" class="hover:opacity-70 transition-opacity">
       <ng-icon name="jamShoppingCart" size="22"></ng-icon>
     </a>
 
@@ -63,7 +73,7 @@
   <div #mobileMenu class="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl lg:hidden z-50">
     <div class="flex flex-col h-full">
       <div class="flex items-center justify-between p-6 border-b border-neutral-100">
-        <span class="text-xl font-bold text-neutral-800 font-family-serif">Menú</span>
+        <span class="text-xl font-bold text-emily-dark font-family-serif">Menú</span>
         <button
           (click)="toggleMobileMenu()"
           class="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
@@ -86,14 +96,43 @@
         </ul>
       </nav>
 
-      <div class="p-6 border-t border-neutral-100">
-        <a
-          href=""
-          class="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 rounded-lg transition-colors"
-        >
-          <ng-icon name="jamUser" size="20"></ng-icon>
-          <span class="font-medium">Mi cuenta</span>
-        </a>
+      <div class="p-6 border-t border-neutral-100 space-y-2 text-emily-cream">
+        <div *ngIf="!isAuthenticated()">
+          <a
+            routerLink="/iniciar-sesion"
+            (click)="toggleMobileMenu()"
+            class="flex items-center justify-center gap-3 px-4 py-3 bg-emily-rose hover:bg-emily-rose/90 text-emily-white rounded-lg transition font-medium"
+          >
+            <ng-icon name="jamUser" size="20"></ng-icon>
+            <span class="text-emily-white">Iniciar sesión</span>
+          </a>
+        </div>
+
+        <div *ngIf="isAuthenticated()" class="space-y-2">
+          <div class="px-4 py-2 bg-emily-light rounded-lg">
+            <p class="text-sm text-emily-taupe">Hola,</p>
+            <p class="font-medium text-emily-dark">
+              {{ currentUser()?.nombre_completo || currentUser()?.email }}
+            </p>
+          </div>
+
+          <a
+            routerLink="/mi-perfil"
+            (click)="toggleMobileMenu()"
+            class="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 rounded-lg transition"
+          >
+            <ng-icon name="jamUser" size="20"></ng-icon>
+            <span class="font-medium">Mi perfil</span>
+          </a>
+
+          <button
+            (click)="logout()"
+            class="w-full flex items-center gap-3 px-4 py-3 text-emily-rose hover:bg-emily-rose/10 rounded-lg transition"
+          >
+            <ng-icon name="jamLogOut" size="20"></ng-icon>
+            <span class="font-medium">Cerrar sesión</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
