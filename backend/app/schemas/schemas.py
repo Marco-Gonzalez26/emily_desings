@@ -163,10 +163,17 @@ class CarritoItemCreate(CarritoItemBase):
     carrito_id: UUID
 
 
-class CarritoItemResponse(CarritoItemBase):
+class CarritoItemResponse(BaseModel):
     """Esquema de respuesta de item de carrito"""
 
     id: UUID
+    carrito_id: UUID
+    producto_id: UUID
+    talla_id: UUID
+    color_id: UUID
+    cantidad: int
+    precio_unitario: Decimal
+    producto: Optional["ProductoResponse"] = None  # ← Incluir producto
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

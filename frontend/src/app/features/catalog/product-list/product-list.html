@@ -1,36 +1,30 @@
-<!-- Banner superior -->
 <div class="bg-emily-rose/40 text-emily-dark text-center text-sm py-2 px-4 font-medium">
   Emily Designs · Moda Estética de Quevedo. Vístete con propósito.
 </div>
 
-<!-- Contenido principal -->
 <div class="min-h-screen bg-emily-light pt-20">
   <div class="max-w-7xl mx-auto px-4 md:px-6 py-8">
     <div class="flex gap-8">
-      <!-- ===== SIDEBAR FILTROS ===== -->
-      <aside class="hidden lg:block w-64 flex-shrink-0">
+      <aside class="hidden lg:block w-64 shrink-0">
         <app-filters
           (filtersChanged)="onFiltersChanged($event)"
           (filtersCleared)="onFiltersCleared()"
         ></app-filters>
       </aside>
 
-      <!-- ===== CONTENIDO PRINCIPAL ===== -->
       <main class="flex-1 min-w-0">
-        <!-- Header del catálogo -->
         <div class="flex items-center justify-between mb-6">
           <div>
             <h1 class="text-2xl font-serif text-emily-dark">Catálogo de Ropa</h1>
             <p class="text-sm text-emily-taupe mt-1">{{ totalProducts() }} productos encontrados</p>
           </div>
 
-          <!-- Ordenar por -->
           <div class="flex items-center gap-2">
             <span class="text-sm text-emily-taupe hidden sm:block">Ordenar por:</span>
             <select
               [ngModel]="selectedSort()"
               (ngModelChange)="onSortChange($event)"
-              class="text-sm border border-emily-taupe/30 bg-emily-white text-emily-dark rounded-lg px-3 py-2 outline-none focus:border-emily-rose transition"
+              class="text-sm border border-emily-taupe/30 bg-emily-white text-emily-dark rounded-lg px-3 py-2 outline-none focus:border-emily-rose transition outline-0"
             >
               <option *ngFor="let opt of sortOptions" [value]="opt.value">
                 {{ opt.label }}
@@ -39,7 +33,6 @@
           </div>
         </div>
 
-        <!-- Loading skeleton -->
         <div *ngIf="isLoading()" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
           <div
             *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8]"
@@ -54,14 +47,12 @@
           </div>
         </div>
 
-        <!-- Grid de productos -->
         <div *ngIf="!isLoading()" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
           <div
             *ngFor="let product of products()"
             [routerLink]="['/productos', product.id]"
             class="bg-emily-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
           >
-            <!-- Imagen -->
             <div class="relative overflow-hidden">
               <img
                 [src]="getMainImage(product)"
@@ -69,7 +60,6 @@
                 class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500"
               />
 
-              <!-- Badges -->
               <div class="absolute top-2 left-2 flex flex-col gap-1">
                 <span
                   *ngIf="product.es_nuevo"
@@ -85,7 +75,6 @@
                 </span>
               </div>
 
-              <!-- Favorito -->
               <button
                 (click)="toggleFavorite(product.id, $event)"
                 class="absolute top-2 right-2 p-1.5 bg-emily-white/80 backdrop-blur-sm rounded-full hover:bg-emily-white transition"
@@ -98,11 +87,9 @@
               </button>
             </div>
 
-            <!-- Info del producto -->
             <div class="p-3">
               <h3 class="text-sm font-medium text-emily-dark truncate">{{ product.nombre }}</h3>
 
-              <!-- Precio -->
               <div class="flex items-center gap-2 mt-1 mb-3">
                 <span class="text-sm font-semibold text-emily-dark">
                   ${{ getPrice(product) | number: '1.2-2' }}
@@ -112,7 +99,6 @@
                 </span>
               </div>
 
-              <!-- Botón añadir al carrito -->
               <button
                 (click)="addToCart(product, $event)"
                 class="w-full bg-emily-dark hover:bg-emily-taupe text-emily-white text-xs font-medium py-2 rounded-lg transition flex items-center justify-center gap-1.5"
@@ -124,7 +110,6 @@
           </div>
         </div>
 
-        <!-- Estado vacío -->
         <div *ngIf="!isLoading() && products().length === 0" class="text-center py-20">
           <p class="text-emily-taupe text-lg">No se encontraron productos</p>
           <button
@@ -135,7 +120,6 @@
           </button>
         </div>
 
-        <!-- Paginación -->
         <div
           *ngIf="!isLoading() && totalPages() > 1"
           class="flex justify-center items-center gap-1 mt-10"

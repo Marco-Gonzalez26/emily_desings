@@ -129,7 +129,27 @@ export class ProductListComponent implements OnInit {
 
   onSortChange(sort: string): void {
     this.selectedSort.set(sort);
-    this.loadProducts();
+
+    if (sort === '') {
+      this.loadProducts();
+      return;
+    }
+
+    const sorted = [...this.products()];
+
+    switch (sort) {
+      case 'precio_asc':
+        sorted.sort((a, b) => this.getPrice(a) - this.getPrice(b));
+        break;
+      case 'precio_desc':
+        sorted.sort((a, b) => this.getPrice(b) - this.getPrice(a));
+        break;
+      case 'nuevos':
+        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+    }
+
+    this.products.set(sorted);
   }
 
   toggleFavorite(productId: string, event: Event): void {

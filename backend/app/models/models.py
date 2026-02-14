@@ -231,7 +231,7 @@ class Producto(Base):
         ),
     )
     
-    # Relaciones
+
     categoria = relationship("Categoria", back_populates="productos")
     marca = relationship("Marca", back_populates="productos")
     administrador = relationship("Usuario", foreign_keys=[administrador_id], back_populates="productos_creados")

@@ -7,6 +7,7 @@ import { AuthLayoutComponent } from './layout/auth/auth';
 import { AppLayoutComponent } from './layout/app/app';
 import { RegisterComponent } from './features/auth/register/register';
 import { ProductListComponent } from './features/catalog/product-list/product-list';
+import { ProductDetailComponent } from './features/catalog/product-detail/product-detail';
 
 export const routes: Routes = [
   {
@@ -17,6 +18,7 @@ export const routes: Routes = [
       { path: 'analisis-morfologico', component: MorphologyAnalysisComponent },
       { path: 'sobre-nosotros', component: AboutUsComponent },
       { path: 'catalogo', component: ProductListComponent },
+      { path: 'productos/:id', component: ProductDetailComponent },
     ],
   },
   {
