@@ -1,5 +1,5 @@
 @if (isLoading()) {
-  <div class="min-h-screen bg-emily-light pt-24 flex items-center justify-center">
+  <div class="bg-emily-light pt-24 flex items-center justify-center">
     <div
       class="w-10 h-10 border-4 border-emily-cream border-t-emily-rose rounded-full animate-spin"
     ></div>
@@ -7,9 +7,9 @@
 }
 
 @if (!isLoading()) {
-  <div class="min-h-screen bg-emily-light pt-20">
+  <div class="bg-emily-light pt-20">
     <div class="max-w-5xl mx-auto px-4 md:px-6 py-10">
-      <div class="flex items-center gap-4 mb-8">
+      <div class="flex items-center gap-4 mb-8 flex-col">
         <a
           routerLink="/catalogo"
           class="flex items-center gap-1.5 text-emily-taupe hover:text-emily-dark transition text-sm"
@@ -129,18 +129,13 @@
               <h2 class="font-serif text-xl text-emily-dark mb-5">Resumen del Pedido</h2>
 
               <div class="space-y-3 pb-4 border-b border-emily-cream">
-                <div class="flex justify-between text-sm">
-                  <span class="text-emily-taupe">Subtotal</span>
-                  <span class="text-emily-dark font-medium"
-                    >${{ cartService.subtotal() | number: '1.2-2' }}</span
-                  >
+                <div class="flex justify-between items-center py-4">
+                  <span class="font-semibold text-emily-dark text-lg">Total</span>
+                  <span class="font-bold text-emily-dark text-xl">
+                    ${{ cartService.total() | number: '1.2-2' }}
+                  </span>
                 </div>
-                <div class="flex justify-between text-sm">
-                  <span class="text-emily-taupe">Impuestos (12%)</span>
-                  <span class="text-emily-dark font-medium"
-                    >${{ impuestos | number: '1.2-2' }}</span
-                  >
-                </div>
+
                 <div class="flex justify-between text-sm">
                   <span class="text-emily-taupe">Envío</span>
                   <span
@@ -166,6 +161,7 @@
               </div>
 
               <button
+                routerLink="/checkout"
                 class="w-full bg-emily-gold hover:bg-emily-taupe text-emily-white font-semibold py-3.5 rounded-xl transition text-sm"
               >
                 Proceder al Pago

@@ -50,6 +50,7 @@ export class CartService {
   }
 
   clearCart(): Observable<Cart> {
+    this.cart.set(null);
     return this.api.delete<Cart>('/api/carrito/').pipe(tap((cart) => this.cart.set(cart)));
   }
 

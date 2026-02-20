@@ -9,17 +9,33 @@ import {
   jamShoppingCart,
   jamChevronLeft,
   jamChevronRight,
+  jamShoppingBag,
 } from '@ng-icons/jam-icons';
 import { ProductoService } from '../../../core/services/product/product';
 import { Product, ProductFilters } from '../../../shared/models/product';
 import { FiltersComponent } from '../filters/filters';
+import { ProductCardComponent } from '../../../shared/components/product-card/product-card';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, NgIconComponent, FiltersComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    NgIconComponent,
+    FiltersComponent,
+    ProductCardComponent,
+  ],
   providers: [
-    provideIcons({ jamHeart, jamHeartF, jamShoppingCart, jamChevronLeft, jamChevronRight }),
+    provideIcons({
+      jamHeart,
+      jamHeartF,
+      jamShoppingCart,
+      jamChevronLeft,
+      jamChevronRight,
+      jamShoppingBag,
+    }),
   ],
   templateUrl: './product-list.html',
   styleUrl: './product-list.css',

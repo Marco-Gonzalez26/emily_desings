@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session, joinedload
 from fastapi import HTTPException, status
 from uuid import UUID
 
-from app.models.models import Carrito, CarritoItem, Producto
+from app.models.models import Carrito, CarritoItem, Producto, Inventario
 
 
 def get_or_create_carrito(db: Session, usuario_id: UUID) -> Carrito:
@@ -37,8 +37,8 @@ def add_item(
     color_id: UUID,
     cantidad: int,
 ) -> Carrito:
-    """Agregar item al carrito o aumentar cantidad si ya existe"""
-    # Verificar que el producto existe y está activo
+    """Agregar item al carrito y reservar stock"""
+
     producto = (
         db.query(Producto)
         .filter(Producto.id == producto_id, Producto.activo == True)
@@ -50,9 +50,33 @@ def add_item(
             status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado"
         )
 
+    # Verificar stock disponible
+    inventario = (
+        db.query(Inventario)
+        .filter(
+            Inventario.producto_id == producto_id,
+            Inventario.talla_id == talla_id,
+            Inventario.color_id == color_id,
+        )
+        .first()
+    )
+
+    if not inventario:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Producto no disponible en esta talla/color",
+        )
+
+    stock_disponible = inventario.stock - inventario.stock_reservado
+    if stock_disponible < cantidad:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Solo hay {stock_disponible} unidades disponibles",
+        )
+
     carrito = get_or_create_carrito(db, usuario_id)
 
-    # Verificar si el item ya existe (mismo producto, talla y color)
+    # Verificar si el item ya existe
     existing_item = (
         db.query(CarritoItem)
         .filter(
@@ -65,11 +89,17 @@ def add_item(
     )
 
     if existing_item:
-        # Aumentar cantidad
-        existing_item.cantidad += cantidad
-        db.commit()
+        nueva_cantidad = existing_item.cantidad + cantidad
+        stock_disponible = inventario.stock - inventario.stock_reservado
+        if stock_disponible < cantidad:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Solo puedes agregar {stock_disponible} unidades más",
+            )
+
+        existing_item.cantidad = nueva_cantidad
+        inventario.stock_reservado += cantidad
     else:
-        # Crear nuevo item
         precio = producto.precio_descuento or producto.precio_regular
         new_item = CarritoItem(
             carrito_id=carrito.id,
@@ -80,8 +110,9 @@ def add_item(
             precio_unitario=precio,
         )
         db.add(new_item)
-        db.commit()
+        inventario.stock_reservado += cantidad
 
+    db.commit()
     return get_or_create_carrito(db, usuario_id)
 
 
@@ -91,7 +122,7 @@ def update_item_quantity(
     item_id: UUID,
     cantidad: int,
 ) -> Carrito:
-    """Actualizar cantidad de un item del carrito"""
+    """Actualizar cantidad y ajustar reserva de stock"""
     carrito = get_or_create_carrito(db, usuario_id)
 
     item = (
@@ -109,9 +140,37 @@ def update_item_quantity(
             detail="Item no encontrado en el carrito",
         )
 
+    inventario = (
+        db.query(Inventario)
+        .filter(
+            Inventario.producto_id == item.producto_id,
+            Inventario.talla_id == item.talla_id,
+            Inventario.color_id == item.color_id,
+        )
+        .first()
+    )
+
+    if not inventario:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Producto no encontrado en inventario",
+        )
+
+    diferencia = cantidad - item.cantidad
+
+    if diferencia > 0:
+        stock_disponible = inventario.stock - inventario.stock_reservado
+        if stock_disponible < diferencia:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Solo hay {stock_disponible} unidades disponibles",
+            )
+
     if cantidad <= 0:
+        inventario.stock_reservado -= item.cantidad
         db.delete(item)
     else:
+        inventario.stock_reservado += diferencia
         item.cantidad = cantidad
 
     db.commit()
@@ -119,7 +178,7 @@ def update_item_quantity(
 
 
 def remove_item(db: Session, usuario_id: UUID, item_id: UUID) -> Carrito:
-    """Eliminar un item del carrito"""
+    """Eliminar item y liberar stock reservado"""
     carrito = get_or_create_carrito(db, usuario_id)
 
     item = (
@@ -137,14 +196,43 @@ def remove_item(db: Session, usuario_id: UUID, item_id: UUID) -> Carrito:
             detail="Item no encontrado en el carrito",
         )
 
+    inventario = (
+        db.query(Inventario)
+        .filter(
+            Inventario.producto_id == item.producto_id,
+            Inventario.talla_id == item.talla_id,
+            Inventario.color_id == item.color_id,
+        )
+        .first()
+    )
+
+    if inventario:
+        inventario.stock_reservado -= item.cantidad
+
     db.delete(item)
     db.commit()
     return get_or_create_carrito(db, usuario_id)
 
 
 def clear_carrito(db: Session, usuario_id: UUID) -> Carrito:
-    """Vaciar el carrito"""
+    """Vaciar carrito y liberar todo el stock reservado"""
     carrito = get_or_create_carrito(db, usuario_id)
+
+    items = db.query(CarritoItem).filter(CarritoItem.carrito_id == carrito.id).all()
+
+    for item in items:
+        inventario = (
+            db.query(Inventario)
+            .filter(
+                Inventario.producto_id == item.producto_id,
+                Inventario.talla_id == item.talla_id,
+                Inventario.color_id == item.color_id,
+            )
+            .first()
+        )
+
+        if inventario:
+            inventario.stock_reservado -= item.cantidad
 
     db.query(CarritoItem).filter(CarritoItem.carrito_id == carrito.id).delete()
 

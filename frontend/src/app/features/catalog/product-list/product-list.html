@@ -26,136 +26,88 @@
               (ngModelChange)="onSortChange($event)"
               class="text-sm border border-emily-taupe/30 bg-emily-white text-emily-dark rounded-lg px-3 py-2 outline-none focus:border-emily-rose transition outline-0"
             >
-              <option *ngFor="let opt of sortOptions" [value]="opt.value">
-                {{ opt.label }}
-              </option>
+              @for (opt of sortOptions; track opt.value) {
+                <option [value]="opt.value">{{ opt.label }}</option>
+              }
             </select>
           </div>
         </div>
 
-        <div *ngIf="isLoading()" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-          <div
-            *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8]"
-            class="bg-emily-white rounded-xl overflow-hidden animate-pulse"
-          >
-            <div class="bg-emily-cream h-64 w-full"></div>
-            <div class="p-3 space-y-2">
-              <div class="h-4 bg-emily-cream rounded w-3/4"></div>
-              <div class="h-4 bg-emily-cream rounded w-1/2"></div>
-              <div class="h-8 bg-emily-cream rounded"></div>
-            </div>
+        @if (isLoading()) {
+          <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+            @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
+              <div class="bg-emily-white rounded-xl overflow-hidden animate-pulse">
+                <div class="bg-emily-cream h-64 w-full"></div>
+                <div class="p-3 space-y-2">
+                  <div class="h-4 bg-emily-cream rounded w-3/4"></div>
+                  <div class="h-4 bg-emily-cream rounded w-1/2"></div>
+                  <div class="h-8 bg-emily-cream rounded"></div>
+                </div>
+              </div>
+            }
           </div>
-        </div>
+        }
 
-        <div *ngIf="!isLoading()" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-          <div
-            *ngFor="let product of products()"
-            [routerLink]="['/productos', product.id]"
-            class="bg-emily-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
-          >
-            <div class="relative overflow-hidden">
-              <img
-                [src]="getMainImage(product)"
-                [alt]="product.nombre"
-                class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500"
+        @if (!isLoading()) {
+          <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+            @for (product of products(); track product.id) {
+              <app-product-card
+                [product]="product"
+                [isFavorite]="isFavorite(product.id)"
+                (favoriteToggled)="toggleFavorite($event, $any($event))"
               />
-
-              <div class="absolute top-2 left-2 flex flex-col gap-1">
-                <span
-                  *ngIf="product.es_nuevo"
-                  class="bg-emily-sage text-emily-white text-xs px-2 py-0.5 rounded-full font-medium"
-                >
-                  Nuevo
-                </span>
-                <span
-                  *ngIf="hasDiscount(product)"
-                  class="bg-emily-rose text-emily-white text-xs px-2 py-0.5 rounded-full font-medium"
-                >
-                  -{{ getDiscountPercent(product) }}%
-                </span>
-              </div>
-
-              <button
-                (click)="toggleFavorite(product.id, $event)"
-                class="absolute top-2 right-2 p-1.5 bg-emily-white/80 backdrop-blur-sm rounded-full hover:bg-emily-white transition"
-              >
-                <ng-icon
-                  [name]="isFavorite(product.id) ? 'jamHeartF' : 'jamHeart'"
-                  size="16"
-                  [class]="isFavorite(product.id) ? 'text-emily-rose' : 'text-emily-taupe'"
-                ></ng-icon>
-              </button>
-            </div>
-
-            <div class="p-3">
-              <h3 class="text-sm font-medium text-emily-dark truncate">{{ product.nombre }}</h3>
-
-              <div class="flex items-center gap-2 mt-1 mb-3">
-                <span class="text-sm font-semibold text-emily-dark">
-                  ${{ getPrice(product) | number: '1.2-2' }}
-                </span>
-                <span *ngIf="hasDiscount(product)" class="text-xs text-emily-taupe line-through">
-                  ${{ product.precio_regular | number: '1.2-2' }}
-                </span>
-              </div>
-
-              <button
-                (click)="addToCart(product, $event)"
-                class="w-full bg-emily-dark hover:bg-emily-taupe text-emily-white text-xs font-medium py-2 rounded-lg transition flex items-center justify-center gap-1.5"
-              >
-                <ng-icon name="jamShoppingCart" size="14"></ng-icon>
-                Añadir al Carrito
-              </button>
-            </div>
+            }
           </div>
-        </div>
+        }
 
-        <div *ngIf="!isLoading() && products().length === 0" class="text-center py-20">
-          <p class="text-emily-taupe text-lg">No se encontraron productos</p>
-          <button
-            (click)="onFiltersCleared()"
-            class="mt-4 text-emily-gold hover:text-emily-dark transition text-sm font-medium"
-          >
-            Limpiar filtros
-          </button>
-        </div>
+        @if (!isLoading() && products().length === 0) {
+          <div class="text-center py-20">
+            <p class="text-emily-taupe text-lg">No se encontraron productos</p>
+            <button
+              (click)="onFiltersCleared()"
+              class="mt-4 text-emily-gold hover:text-emily-dark transition text-sm font-medium"
+            >
+              Limpiar filtros
+            </button>
+          </div>
+        }
 
-        <div
-          *ngIf="!isLoading() && totalPages() > 1"
-          class="flex justify-center items-center gap-1 mt-10"
-        >
-          <button
-            (click)="prevPage()"
-            [disabled]="currentPage() === 1"
-            class="p-2 rounded-lg border border-emily-taupe/30 text-emily-taupe hover:border-emily-dark hover:text-emily-dark transition disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <ng-icon name="jamChevronLeft" size="16"></ng-icon>
-          </button>
+        @if (!isLoading() && totalPages() > 1) {
+          <div class="flex justify-center items-center gap-1 mt-10">
+            <button
+              (click)="prevPage()"
+              [disabled]="currentPage() === 1"
+              class="p-2 rounded-lg border border-emily-taupe/30 text-emily-taupe hover:border-emily-dark hover:text-emily-dark transition disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <ng-icon name="jamChevronLeft" size="16"></ng-icon>
+            </button>
 
-          <button
-            *ngFor="let page of pages()"
-            (click)="goToPage(page)"
-            [disabled]="page === '...'"
-            class="w-9 h-9 rounded-lg text-sm font-medium transition"
-            [class]="
-              page === currentPage()
-                ? 'bg-emily-dark text-emily-white'
-                : page === '...'
-                  ? 'text-emily-taupe cursor-default'
-                  : 'border border-emily-taupe/30 text-emily-taupe hover:border-emily-dark hover:text-emily-dark'
-            "
-          >
-            {{ page }}
-          </button>
+            @for (page of pages(); track $index) {
+              <button
+                (click)="goToPage(page)"
+                [disabled]="page === '...'"
+                class="w-9 h-9 rounded-lg text-sm font-medium transition"
+                [class]="
+                  page === currentPage()
+                    ? 'bg-emily-dark text-emily-white'
+                    : page === '...'
+                      ? 'text-emily-taupe cursor-default'
+                      : 'border border-emily-taupe/30 text-emily-taupe hover:border-emily-dark hover:text-emily-dark'
+                "
+              >
+                {{ page }}
+              </button>
+            }
 
-          <button
-            (click)="nextPage()"
-            [disabled]="currentPage() === totalPages()"
-            class="p-2 rounded-lg border border-emily-taupe/30 text-emily-taupe hover:border-emily-dark hover:text-emily-dark transition disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <ng-icon name="jamChevronRight" size="16"></ng-icon>
-          </button>
-        </div>
+            <button
+              (click)="nextPage()"
+              [disabled]="currentPage() === totalPages()"
+              class="p-2 rounded-lg border border-emily-taupe/30 text-emily-taupe hover:border-emily-dark hover:text-emily-dark transition disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <ng-icon name="jamChevronRight" size="16"></ng-icon>
+            </button>
+          </div>
+        }
       </main>
     </div>
   </div>

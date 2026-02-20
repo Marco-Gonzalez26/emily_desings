@@ -58,32 +58,11 @@ def get_productos(
     activo: Optional[bool] = True,
     search: Optional[str] = None,
 ) -> tuple[List[Producto], int]:
-    """
-    Listar productos con filtros y paginación
+    from sqlalchemy import exists, select
+    from app.models.models import Inventario
 
-    Args:
-        db: Sesión de base de datos
-        skip: Número de registros a saltar
-        limit: Número máximo de registros a retornar
-        categoria_id: Filtrar por categoría
-        marca_id: Filtrar por marca
-        precio_min: Precio mínimo
-        precio_max: Precio máximo
-        es_nuevo: Filtrar productos nuevos
-        es_oferta: Filtrar productos en oferta
-        es_destacado: Filtrar productos destacados
-        activo: Filtrar productos activos/inactivos
-        search: Buscar en nombre o descripción
+    query = db.query(Producto).options(joinedload(Producto.imagenes))
 
-    Returns:
-        Tupla con (lista de productos, total de registros)
-    """
-    query = (
-        db.query(Producto)
-        .options(joinedload(Producto.imagenes))
-    )
-
-    # Aplicar filtros
     if activo is not None:
         query = query.filter(Producto.activo == activo)
 
@@ -116,11 +95,18 @@ def get_productos(
         )
         query = query.filter(search_filter)
 
-    # Contar total
-    total = query.count()
-
-    # Aplicar paginación
+    total = query.distinct().count()
     productos = query.offset(skip).limit(limit).all()
+
+    # Agregar tiene_stock a cada producto
+    for producto in productos:
+        tiene_stock = db.query(
+            exists().where(
+                Inventario.producto_id == producto.id,
+                Inventario.stock > Inventario.stock_reservado,
+            )
+        ).scalar()
+        producto.tiene_stock = tiene_stock  # Agregar atributo dinámico
 
     return productos, total
 

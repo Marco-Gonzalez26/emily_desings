@@ -13,13 +13,11 @@
     <ul
       class="text-sm [&>li>a]:text-current [&>li>a]:font-medium [&>li>a]:inline-block [&>li>a]:px-4 [&>li>a]:py-2 hidden lg:flex"
     >
-      <li
-        *ngFor="let link of links()"
-        (mouseenter)="onMouseEnter($event)"
-        (mouseleave)="onMouseLeave()"
-      >
-        <a [routerLink]="link.href">{{ link.name }}</a>
-      </li>
+      @for (link of links(); track link.href) {
+        <li (mouseenter)="onMouseEnter($event)" (mouseleave)="onMouseLeave()">
+          <a [routerLink]="link.href">{{ link.name }}</a>
+        </li>
+      }
     </ul>
   </nav>
 
@@ -28,114 +26,155 @@
       class="text-sm [&>li>a]:font-medium [&>li>a]:text-current [&>li>a]:inline-block [&>li>a]:px-4 [&>li>a]:py-2 flex items-center"
     >
       <li>
-        <a routerLink="/carrito" class="hover:opacity-70 transition-opacity">
+        <a routerLink="/carrito" class="hover:opacity-70 transition-opacity relative">
           <ng-icon name="jamShoppingCart" size="22"></ng-icon>
+          @if (authService.isLoggedIn() && cartService.totalItems() > 0) {
+            <span
+              class="absolute -top-2 -right-2 bg-emily-rose text-emily-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+            >
+              {{ cartService.totalItems() }}
+            </span>
+          }
         </a>
       </li>
 
-      <li *ngIf="!isAuthenticated()">
-        <a
-          routerLink="/iniciar-sesion"
-          class="bg-emily-rose hover:bg-emily-rose/90 text-emily-white! px-4 py-2 rounded-lg transition t"
-        >
-          Iniciar sesión
-        </a>
-      </li>
+      @if (!authService.isLoggedIn()) {
+        <li>
+          <a
+            routerLink="/iniciar-sesion"
+            class="bg-emily-rose hover:bg-emily-rose/90 text-emily-white! px-4 py-2 rounded-lg transition"
+          >
+            Iniciar sesión
+          </a>
+        </li>
+      }
 
-      <li *ngIf="isAuthenticated()">
-        <a routerLink="/perfil" class="hover:opacity-70 transition-opacity">
-          <ng-icon name="jamUser" size="22"></ng-icon>
-        </a>
-      </li>
+      @if (authService.isLoggedIn()) {
+        <li>
+          <a routerLink="/ordenes" class="hover:opacity-70 transition-opacity"> Mis Órdenes </a>
+        </li>
+        <li>
+          <a routerLink="/perfil" class="hover:opacity-70 transition-opacity">
+            <ng-icon name="jamUser" size="22"></ng-icon>
+          </a>
+        </li>
+      }
     </ul>
   </nav>
 
   <nav class="flex lg:hidden items-center gap-4">
-    <a routerLink="/carrito" class="hover:opacity-70 transition-opacity">
+    <a routerLink="/carrito" class="hover:opacity-70 transition-opacity relative">
       <ng-icon name="jamShoppingCart" size="22"></ng-icon>
+      @if (authService.isLoggedIn() && cartService.totalItems() > 0) {
+        <span
+          class="absolute -top-2 -right-2 bg-emily-rose text-emily-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+        >
+          {{ cartService.totalItems() }}
+        </span>
+      }
     </a>
 
     <button
       (click)="toggleMobileMenu()"
       class="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
-      [attr.aria-label]="mobileMenuOpen() ? 'Cerrar menú' : 'Abrir menú'"
+      [attr.aria-label]="isMobileMenuOpen() ? 'Cerrar menú' : 'Abrir menú'"
     >
-      <ng-icon [name]="mobileMenuOpen() ? 'jamClose' : 'jamMenu'" size="24"></ng-icon>
+      <ng-icon [name]="isMobileMenuOpen() ? 'jamClose' : 'jamMenu'" size="24"></ng-icon>
     </button>
   </nav>
 
-  <div
-    #mobileOverlay
-    class="fixed inset-0 bg-black/20 backdrop-blur-sm lg:hidden z-40"
-    (click)="toggleMobileMenu()"
-  ></div>
+  @if (isMobileMenuOpen()) {
+    <div
+      class="fixed inset-0 bg-black/20 backdrop-blur-sm lg:hidden z-40"
+      (click)="toggleMobileMenu()"
+    ></div>
+  }
 
-  <div #mobileMenu class="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl lg:hidden z-50">
-    <div class="flex flex-col h-full">
-      <div class="flex items-center justify-between p-6 border-b border-neutral-100">
-        <span class="text-xl font-bold text-emily-dark font-family-serif">Menú</span>
-        <button
-          (click)="toggleMobileMenu()"
-          class="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
-        >
-          <ng-icon name="jamClose" size="24"></ng-icon>
-        </button>
-      </div>
-
-      <nav class="flex-1 overflow-y-auto overflow-x-hidden">
-        <ul class="py-4">
-          <li *ngFor="let link of links()">
-            <a
-              [routerLink]="link.href"
-              (click)="toggleMobileMenu()"
-              class="block px-6 py-4 text-base font-medium text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors border-b border-neutral-50"
-            >
-              {{ link.name }}
-            </a>
-          </li>
-        </ul>
-      </nav>
-
-      <div class="p-6 border-t border-neutral-100 space-y-2 text-emily-cream">
-        <div *ngIf="!isAuthenticated()">
-          <a
-            routerLink="/iniciar-sesion"
+  @if (isMobileMenuOpen()) {
+    <div class="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl lg:hidden z-50">
+      <div class="flex flex-col h-full">
+        <div class="flex items-center justify-between p-6 border-b border-neutral-100">
+          <span class="text-xl font-bold text-emily-dark font-family-serif">Menú</span>
+          <button
             (click)="toggleMobileMenu()"
-            class="flex items-center justify-center gap-3 px-4 py-3 bg-emily-rose hover:bg-emily-rose/90 text-emily-white rounded-lg transition font-medium"
+            class="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
           >
-            <ng-icon name="jamUser" size="20"></ng-icon>
-            <span class="text-emily-white">Iniciar sesión</span>
-          </a>
+            <ng-icon name="jamClose" size="24"></ng-icon>
+          </button>
         </div>
 
-        <div *ngIf="isAuthenticated()" class="space-y-2">
-          <div class="px-4 py-2 bg-emily-light rounded-lg">
-            <p class="text-sm text-emily-taupe">Hola,</p>
-            <p class="font-medium text-emily-dark">
-              {{ currentUser()?.nombre_completo || currentUser()?.email }}
-            </p>
-          </div>
+        <nav class="flex-1 overflow-y-auto overflow-x-hidden">
+          <ul class="py-4">
+            @for (link of links(); track link.href) {
+              <li class="mobile-menu-item">
+                <a
+                  [routerLink]="link.href"
+                  (click)="toggleMobileMenu()"
+                  class="block px-6 py-4 text-base font-medium text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors border-b border-neutral-50"
+                >
+                  {{ link.name }}
+                </a>
+              </li>
+            }
+          </ul>
+        </nav>
 
-          <a
-            routerLink="/mi-perfil"
-            (click)="toggleMobileMenu()"
-            class="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 rounded-lg transition"
-          >
-            <ng-icon name="jamUser" size="20"></ng-icon>
-            <span class="font-medium">Mi perfil</span>
-          </a>
+        <div class="p-6 border-t border-neutral-100 space-y-2 text-emily-cream">
+          @if (!authService.isLoggedIn()) {
+            <div>
+              <a
+                routerLink="/iniciar-sesion"
+                (click)="toggleMobileMenu()"
+                class="flex items-center justify-center gap-3 px-4 py-3 bg-emily-rose hover:bg-emily-rose/90 text-emily-white rounded-lg transition font-medium"
+              >
+                <ng-icon name="jamUser" size="20"></ng-icon>
+                <span class="text-emily-white">Iniciar sesión</span>
+              </a>
+            </div>
+          }
 
-          <button
-            (click)="logout()"
-            class="w-full flex items-center gap-3 px-4 py-3 text-emily-rose hover:bg-emily-rose/10 rounded-lg transition"
-          >
-            <ng-icon name="jamLogOut" size="20"></ng-icon>
-            <span class="font-medium">Cerrar sesión</span>
-          </button>
+          @if (authService.isLoggedIn()) {
+            <div class="space-y-2">
+              <div class="px-4 py-2 bg-emily-light rounded-lg">
+                <p class="text-sm text-emily-taupe">Hola,</p>
+                <p class="font-medium text-emily-dark">
+                  {{
+                    authService.currentUser()?.nombre_completo || authService.currentUser()?.email
+                  }}
+                </p>
+              </div>
+
+              <a
+                routerLink="/ordenes"
+                (click)="toggleMobileMenu()"
+                class="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 rounded-lg transition"
+              >
+                <ng-icon name="jamBox" size="20"></ng-icon>
+                <span class="font-medium">Mis Órdenes</span>
+              </a>
+
+              <a
+                routerLink="/mi-perfil"
+                (click)="toggleMobileMenu()"
+                class="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 rounded-lg transition"
+              >
+                <ng-icon name="jamUser" size="20"></ng-icon>
+                <span class="font-medium">Mi perfil</span>
+              </a>
+
+              <button
+                (click)="logout()"
+                class="w-full flex items-center gap-3 px-4 py-3 text-emily-rose hover:bg-emily-rose/10 rounded-lg transition"
+              >
+                <ng-icon name="jamLogOut" size="20"></ng-icon>
+                <span class="font-medium">Cerrar sesión</span>
+              </button>
+            </div>
+          }
         </div>
       </div>
     </div>
-  </div>
+  }
 
   <div
     #menuBackdrop

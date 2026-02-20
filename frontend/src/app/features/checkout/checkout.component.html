@@ -1,0 +1,292 @@
+<div class="min-h-screen bg-emily-light pt-20">
+  <div class="max-w-4xl mx-auto px-4 md:px-6 py-10">
+    <div class="flex items-center gap-4 mb-8">
+      <a
+        routerLink="/carrito"
+        class="flex items-center gap-1.5 text-emily-taupe hover:text-emily-dark transition text-sm"
+      >
+        <ng-icon name="jamArrowLeft" size="16"></ng-icon>
+        Volver al carrito
+      </a>
+    </div>
+
+    <h1 class="font-serif text-3xl text-emily-dark mb-8">Finalizar Compra</h1>
+
+    <div class="flex items-center justify-center mb-10">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <div
+            class="w-10 h-10 rounded-full flex items-center justify-center font-semibold transition"
+            [class]="
+              step() >= 1 ? 'bg-emily-dark text-emily-white' : 'bg-emily-cream text-emily-taupe'
+            "
+          >
+            @if (step() > 1) {
+              <ng-icon name="jamCheck" size="18"></ng-icon>
+            } @else {
+              1
+            }
+          </div>
+          <span
+            class="text-sm font-medium"
+            [class]="step() === 1 ? 'text-emily-dark' : 'text-emily-taupe'"
+          >
+            Datos de envío
+          </span>
+        </div>
+
+        <div class="w-16 h-0.5 bg-emily-cream"></div>
+
+        <div class="flex items-center gap-2">
+          <div
+            class="w-10 h-10 rounded-full flex items-center justify-center font-semibold transition"
+            [class]="
+              step() === 2 ? 'bg-emily-dark text-emily-white' : 'bg-emily-cream text-emily-taupe'
+            "
+          >
+            2
+          </div>
+          <span
+            class="text-sm font-medium"
+            [class]="step() === 2 ? 'text-emily-dark' : 'text-emily-taupe'"
+          >
+            Pago
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2">
+        @if (step() === 1) {
+          <div class="bg-emily-white rounded-2xl p-6">
+            <h2 class="font-serif text-xl text-emily-dark mb-6">Información de Envío</h2>
+
+            <form [formGroup]="shippingForm" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-emily-dark mb-1"
+                  >Nombre completo *</label
+                >
+                <input
+                  type="text"
+                  formControlName="nombre"
+                  class="w-full px-4 py-2.5 rounded-xl border-2 border-emily-cream focus:border-emily-rose outline-none transition"
+                  placeholder="Juan Pérez"
+                />
+                @if (shippingForm.get('nombre')?.invalid && shippingForm.get('nombre')?.touched) {
+                  <p class="text-xs text-emily-rose mt-1">Este campo es requerido</p>
+                }
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-emily-dark mb-1">Teléfono *</label>
+                <input
+                  type="tel"
+                  formControlName="telefono"
+                  class="w-full px-4 py-2.5 rounded-xl border-2 border-emily-cream focus:border-emily-rose outline-none transition"
+                  placeholder="0987654321"
+                />
+                @if (
+                  shippingForm.get('telefono')?.invalid && shippingForm.get('telefono')?.touched
+                ) {
+                  <p class="text-xs text-emily-rose mt-1">
+                    Ingresa un teléfono válido de 10 dígitos
+                  </p>
+                }
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-emily-dark mb-1">Dirección *</label>
+                <input
+                  type="text"
+                  formControlName="direccion"
+                  class="w-full px-4 py-2.5 rounded-xl border-2 border-emily-cream focus:border-emily-rose outline-none transition"
+                  placeholder="Av. Principal 123"
+                />
+                @if (
+                  shippingForm.get('direccion')?.invalid && shippingForm.get('direccion')?.touched
+                ) {
+                  <p class="text-xs text-emily-rose mt-1">Este campo es requerido</p>
+                }
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-emily-dark mb-1">Ciudad *</label>
+                  <input
+                    type="text"
+                    formControlName="ciudad"
+                    class="w-full px-4 py-2.5 rounded-xl border-2 border-emily-cream focus:border-emily-rose outline-none transition"
+                    placeholder="Quevedo"
+                  />
+                  @if (shippingForm.get('ciudad')?.invalid && shippingForm.get('ciudad')?.touched) {
+                    <p class="text-xs text-emily-rose mt-1">Requerido</p>
+                  }
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-emily-dark mb-1">Provincia *</label>
+                  <input
+                    type="text"
+                    formControlName="provincia"
+                    class="w-full px-4 py-2.5 rounded-xl border-2 border-emily-cream focus:border-emily-rose outline-none transition"
+                    placeholder="Los Ríos"
+                  />
+                  @if (
+                    shippingForm.get('provincia')?.invalid && shippingForm.get('provincia')?.touched
+                  ) {
+                    <p class="text-xs text-emily-rose mt-1">Requerido</p>
+                  }
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-emily-dark mb-1"
+                  >Código Postal *</label
+                >
+                <input
+                  type="text"
+                  formControlName="codigoPostal"
+                  class="w-full px-4 py-2.5 rounded-xl border-2 border-emily-cream focus:border-emily-rose outline-none transition"
+                  placeholder="120501"
+                />
+                @if (
+                  shippingForm.get('codigoPostal')?.invalid &&
+                  shippingForm.get('codigoPostal')?.touched
+                ) {
+                  <p class="text-xs text-emily-rose mt-1">Este campo es requerido</p>
+                }
+              </div>
+
+              <button
+                type="button"
+                (click)="nextStep()"
+                class="w-full bg-emily-dark hover:bg-emily-taupe text-emily-white font-semibold py-3.5 rounded-xl transition flex items-center justify-center gap-2 mt-6"
+              >
+                Continuar al pago
+                <ng-icon name="jamArrowRight" size="18"></ng-icon>
+              </button>
+            </form>
+          </div>
+        }
+
+        @if (step() === 2) {
+          <div class="bg-emily-white rounded-2xl p-6">
+            <h2 class="font-serif text-xl text-emily-dark mb-6">Método de Pago</h2>
+
+            <div class="space-y-4">
+              <div class="border-2 border-emily-rose bg-emily-rose/5 rounded-xl p-4">
+                <div class="flex items-center gap-3 mb-2">
+                  <div
+                    class="w-10 h-10 bg-emily-rose/20 rounded-full flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-5 h-5 text-emily-rose"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-semibold text-emily-dark">Stripe Checkout</p>
+                    <p class="text-xs text-emily-taupe">Pago seguro con tarjeta</p>
+                  </div>
+                </div>
+                <p class="text-xs text-emily-taupe">
+                  Serás redirigido a Stripe para completar tu pago de forma segura.
+                </p>
+              </div>
+
+              <div class="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  (click)="prevStep()"
+                  class="flex-1 border-2 border-emily-cream text-emily-taupe hover:border-emily-dark hover:text-emily-dark font-semibold py-3.5 rounded-xl transition flex items-center justify-center gap-2"
+                >
+                  <ng-icon name="jamArrowLeft" size="18"></ng-icon>
+                  Volver
+                </button>
+                <button
+                  type="button"
+                  (click)="procesarPago()"
+                  [disabled]="isProcessing()"
+                  class="flex-1 bg-emily-gold hover:bg-emily-taupe text-emily-white font-semibold py-3.5 rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  @if (isProcessing()) {
+                    <div
+                      class="w-5 h-5 border-2 border-emily-white border-t-transparent rounded-full animate-spin"
+                    ></div>
+                    Procesando...
+                  } @else {
+                    Proceder al pago
+                  }
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="lg:col-span-1">
+        <div class="bg-emily-white rounded-2xl p-6 sticky top-24">
+          <h2 class="font-serif text-xl text-emily-dark mb-5">Resumen de Compra</h2>
+
+          <div class="space-y-3 mb-4">
+            @for (item of cartService.items(); track item.id) {
+              <div class="flex gap-3">
+                <img
+                  [src]="cartService.getProductImage(item)"
+                  [alt]="item.producto?.nombre"
+                  class="w-16 h-20 object-cover rounded-lg bg-emily-cream"
+                />
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-emily-dark truncate">
+                    {{ item.producto?.nombre }}
+                  </p>
+                  <p class="text-xs text-emily-taupe">Cant: {{ item.cantidad }}</p>
+                  <p class="text-sm font-semibold text-emily-dark">
+                    ${{ cartService.getItemTotal(item) | number: '1.2-2' }}
+                  </p>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="space-y-3 py-4 border-t border-emily-cream">
+            <div class="flex justify-between text-sm">
+              <span class="text-emily-taupe">Subtotal</span>
+              <span class="text-emily-dark font-medium"
+                >${{ cartService.subtotal() | number: '1.2-2' }}</span
+              >
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-emily-taupe">Impuestos (12%)</span>
+              <span class="text-emily-dark font-medium">${{ impuestos | number: '1.2-2' }}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-emily-taupe">Envío</span>
+              <span
+                class="font-medium"
+                [class]="cartService.envio() === 0 ? 'text-emily-sage' : 'text-emily-dark'"
+              >
+                {{ cartService.envio() === 0 ? 'Gratis' : '$' + cartService.envio() }}
+              </span>
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center pt-4 border-t border-emily-cream">
+            <span class="font-semibold text-emily-dark text-lg">Total</span>
+            <span class="font-bold text-emily-dark text-xl">${{ total | number: '1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

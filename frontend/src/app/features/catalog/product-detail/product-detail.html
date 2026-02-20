@@ -135,22 +135,19 @@
           <div>
             <div class="flex justify-between items-center mb-3">
               <p class="text-sm font-semibold text-emily-dark">Talla</p>
-              <button class="text-xs text-emily-gold hover:text-emily-dark transition underline">
-                Guía de tallas
-              </button>
             </div>
             <div class="flex flex-wrap gap-2">
-              @for (talla of tallas; track talla) {
+              @for (talla of tallasDisponibles(); track talla.id) {
                 <button
-                  (click)="selectTalla(talla)"
+                  (click)="selectTalla(talla.id)"
                   class="min-w-11 px-3 py-2 rounded-lg text-sm font-medium border-2 transition"
                   [class]="
-                    selectedTalla() === talla
+                    selectedTalla() === talla.id
                       ? 'border-emily-dark bg-emily-dark text-emily-white'
                       : 'border-emily-cream bg-emily-white text-emily-taupe hover:border-emily-taupe hover:text-emily-dark'
                   "
                 >
-                  {{ talla }}
+                  {{ getTallaDisplay(talla) }}
                 </button>
               }
             </div>
@@ -160,18 +157,20 @@
             <p class="text-sm font-semibold text-emily-dark mb-3">
               Color
               @if (selectedColor()) {
-                <span class="font-normal text-emily-taupe ml-2">— {{ selectedColor() }}</span>
+                <span class="font-normal text-emily-taupe ml-2"
+                  >— {{ selectedColor()?.nombre }}</span
+                >
               }
             </p>
             <div class="flex gap-3">
-              @for (color of colors; track color.name) {
+              @for (color of coloresDisponibles(); track color.id) {
                 <button
-                  (click)="selectColor(color.name)"
+                  (click)="selectColor(color)"
                   class="w-8 h-8 rounded-full transition-transform hover:scale-110 relative"
-                  [style.backgroundColor]="color.hex"
-                  [title]="color.name"
+                  [style.backgroundColor]="color.codigo_hexadecimal || '#ccc'"
+                  [title]="color.nombre"
                 >
-                  @if (selectedColor() === color.name) {
+                  @if (selectedColor()?.id === color.id) {
                     <span
                       class="absolute inset-0 rounded-full ring-2 ring-offset-2 ring-emily-gold"
                     ></span>
@@ -202,7 +201,13 @@
                 <ng-icon name="jamPlus" size="16"></ng-icon>
               </button>
             </div>
-            <span class="text-xs text-emily-sage font-medium">✓ En stock</span>
+            @if (stockDisponible() > 0) {
+              <span class="text-xs text-emily-sage font-medium"
+                >✓ {{ stockDisponible() }} disponibles</span
+              >
+            } @else if (selectedTalla() && selectedColor()) {
+              <span class="text-xs text-emily-rose font-medium">✗ Sin stock</span>
+            }
           </div>
 
           <div class="flex gap-3">
@@ -227,14 +232,8 @@
           </div>
 
           <div class="grid grid-cols-2 gap-2 pt-2">
-            <div class="flex items-center gap-2 bg-emily-light rounded-xl px-3 py-2.5">
-              <ng-icon name="jamTruck" size="16" class="text-emily-gold shrink-0"></ng-icon>
-              <span class="text-xs text-emily-taupe">Envío gratis desde $50</span>
-            </div>
-            <div class="flex items-center gap-2 bg-emily-light rounded-xl px-3 py-2.5">
-              <ng-icon name="jamUndo" size="16" class="text-emily-gold shrink-0"></ng-icon>
-              <span class="text-xs text-emily-taupe">Devolución en 30 días</span>
-            </div>
+            <div class="flex items-center gap-2 bg-emily-light rounded-xl px-3 py-2.5"></div>
+            <div class="flex items-center gap-2 bg-emily-light rounded-xl px-3 py-2.5"></div>
             <div class="flex items-center gap-2 bg-emily-light rounded-xl px-3 py-2.5">
               <ng-icon name="jamShield" size="16" class="text-emily-gold shrink-0"></ng-icon>
               <span class="text-xs text-emily-taupe">Pago seguro</span>
@@ -305,4 +304,5 @@
       }
     </div>
   </div>
+  <p-toast></p-toast>
 }

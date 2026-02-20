@@ -109,6 +109,7 @@ class ProductoResponse(ProductoBase):
     created_at: datetime
     updated_at: datetime
     imagenes: List[ImagenProductoResponse] = []
+    tiene_stock: Optional[bool] = None
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -205,30 +206,41 @@ class OrdenItemBase(BaseModel):
 
 class OrdenItemCreate(BaseModel):
     producto_id: UUID
+    nombre_producto: str
     talla_id: UUID
     color_id: UUID
     cantidad: int = Field(..., gt=0)
+    precio_unitario: Decimal
+    subtotal: Decimal
 
 
-class OrdenItemResponse(OrdenItemBase):
-    """Esquema de respuesta de item de orden"""
-
+class OrdenItemResponse(BaseModel):
     id: UUID
+    orden_id: UUID
+    producto_id: UUID
+    nombre_producto: str
+    talla_id: UUID
+    color_id: UUID
+    cantidad: int
+    precio_unitario: Decimal
+    subtotal: Decimal
+    producto: Optional['ProductoResponse'] = None  
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class OrdenCreate(BaseModel):
-    """Esquema para crear orden"""
-
     direccion_envio: str
+    subtotal: Decimal
+    costo_envio: Decimal = Decimal("0")
+    impuestos: Decimal = Decimal("0")
+    total: Decimal
     metodo_pago: str
-    items: List[OrdenItemCreate] = Field(default_factory=list)
+    items: List[OrdenItemCreate]
 
 
 class OrdenResponse(BaseModel):
-    """Esquema de respuesta de orden"""
-
     id: UUID
     numero_orden: str
     usuario_id: UUID
@@ -239,10 +251,29 @@ class OrdenResponse(BaseModel):
     total: Decimal
     estado: str
     metodo_pago: Optional[str] = None
+    stripe_payment_id: Optional[str] = None
+    motivo_cancelacion: Optional[str] = None
     fecha_orden: datetime
-    items: List[OrdenItemCreate] = Field(default_factory=list)
+    fecha_actualizacion_estado: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+    items: List[OrdenItemResponse] = []
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class StripeCheckoutRequest(BaseModel):
+    """Request para crear sesión de Stripe Checkout"""
+
+    success_url: str
+    cancel_url: str
+
+
+class StripeCheckoutResponse(BaseModel):
+    """Response con URL de checkout de Stripe"""
+
+    checkout_url: str
+    session_id: str
 
 
 class PerfilMorfologicoBase(BaseModel):
@@ -417,3 +448,69 @@ class CatalogoHomeResponse(BaseModel):
     ofertas: List[ProductoResponse]
     categorias: List[CategoriaResponse]
     marcas: List[MarcaResponse]
+
+
+# Agrega estos schemas en tu schemas.py
+
+
+class TallaBase(BaseModel):
+    nombre: str
+    abreviatura: Optional[str] = None
+    orden: int = 0
+    activo: bool = True
+
+
+class TallaCreate(TallaBase):
+    pass
+
+
+class TallaUpdate(BaseModel):
+    nombre: Optional[str] = None
+    abreviatura: Optional[str] = None
+    orden: Optional[int] = None
+    activo: Optional[bool] = None
+
+
+class TallaResponse(TallaBase):
+    id: UUID
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ColorBase(BaseModel):
+    nombre: str
+    codigo_hexadecimal: Optional[str] = None
+    activo: bool = True
+
+
+class ColorCreate(ColorBase):
+    pass
+
+
+class ColorUpdate(BaseModel):
+    nombre: Optional[str] = None
+    codigo_hexadecimal: Optional[str] = None
+    activo: Optional[bool] = None
+
+
+class ColorResponse(ColorBase):
+    id: UUID
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class InventarioProductoResponse(BaseModel):
+    """Inventario con relaciones para mostrar en detalle de producto"""
+
+    id: UUID
+    producto_id: UUID
+    talla_id: UUID
+    color_id: UUID
+    stock: int
+    stock_reservado: int
+    talla: Optional[TallaResponse] = None
+    color: Optional[ColorResponse] = None
+
+    model_config = ConfigDict(from_attributes=True)

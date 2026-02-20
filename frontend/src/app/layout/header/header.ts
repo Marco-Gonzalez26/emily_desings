@@ -1,25 +1,41 @@
-import { Component, signal, ViewChild, ElementRef, AfterViewInit, computed } from '@angular/core';
+import {
+  Component,
+  signal,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+  computed,
+  OnInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { provideIcons, NgIconComponent } from '@ng-icons/core';
-import { jamShoppingCart, jamUser, jamMenu, jamClose, jamLogOut } from '@ng-icons/jam-icons';
-import { RouterLink } from '@angular/router';
+import {
+  jamShoppingCart,
+  jamUser,
+  jamMenu,
+  jamClose,
+  jamLogOut,
+  jamBox,
+} from '@ng-icons/jam-icons';
+import { Router, RouterLink } from '@angular/router';
 import { gsap } from 'gsap';
 import { AuthService } from '../../core/services/auth';
+import { CartService } from '../../core/services/cart.service';
 
 @Component({
   selector: 'app-header',
   imports: [CommonModule, NgIconComponent, RouterLink],
-  providers: [provideIcons({ jamShoppingCart, jamUser, jamMenu, jamClose, jamLogOut })],
+  providers: [provideIcons({ jamShoppingCart, jamUser, jamMenu, jamClose, jamLogOut, jamBox })],
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
-export class Header implements AfterViewInit {
+export class Header implements AfterViewInit, OnInit {
   @ViewChild('menuBackdrop') menuBackdrop!: ElementRef<HTMLElement>;
   @ViewChild('mobileMenu') mobileMenu!: ElementRef<HTMLElement>;
   @ViewChild('mobileOverlay') mobileOverlay!: ElementRef<HTMLElement>;
 
   protected readonly title = signal('EmilyDesings | Pagina Principal');
-  protected readonly mobileMenuOpen = signal(false);
+  protected readonly isMobileMenuOpen = signal(false);
 
   protected readonly links = signal([
     { name: 'Inicio', href: '' },
@@ -31,7 +47,17 @@ export class Header implements AfterViewInit {
   protected readonly isAuthenticated = computed(() => this.authService.isAuthenticated());
   protected readonly currentUser = computed(() => this.authService.currentUser());
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    public authService: AuthService,
+    public cartService: CartService,
+    private router: Router,
+  ) {}
+
+  ngOnInit(): void {
+    if (this.authService.isLoggedIn()) {
+      this.cartService.getCart().subscribe();
+    }
+  }
 
   ngAfterViewInit(): void {
     if (this.mobileMenu) {
@@ -43,8 +69,8 @@ export class Header implements AfterViewInit {
   }
 
   toggleMobileMenu(): void {
-    const isOpen = !this.mobileMenuOpen();
-    this.mobileMenuOpen.set(isOpen);
+    const isOpen = !this.isMobileMenuOpen();
+    this.isMobileMenuOpen.set(isOpen);
 
     if (isOpen) {
       this.openMobileMenu();
@@ -61,7 +87,6 @@ export class Header implements AfterViewInit {
   private openMobileMenu(): void {
     document.body.style.overflow = 'hidden';
 
-    // Animar overlay
     gsap.set(this.mobileOverlay.nativeElement, { display: 'block' });
     gsap.to(this.mobileOverlay.nativeElement, {
       opacity: 1,
@@ -69,14 +94,12 @@ export class Header implements AfterViewInit {
       ease: 'power2.out',
     });
 
-    // Animar menú desde la derecha
     gsap.to(this.mobileMenu.nativeElement, {
       x: '0%',
       duration: 0.4,
       ease: 'power3.out',
     });
 
-    // Animar items del menú
     const menuItems = this.mobileMenu.nativeElement.querySelectorAll('li');
     gsap.fromTo(
       menuItems,
@@ -95,7 +118,6 @@ export class Header implements AfterViewInit {
   private closeMobileMenu(): void {
     document.body.style.overflow = '';
 
-    // Animar overlay
     gsap.to(this.mobileOverlay.nativeElement, {
       opacity: 0,
       duration: 0.25,
@@ -105,7 +127,6 @@ export class Header implements AfterViewInit {
       },
     });
 
-    // Animar menú hacia la derecha
     gsap.to(this.mobileMenu.nativeElement, {
       x: '100%',
       duration: 0.35,

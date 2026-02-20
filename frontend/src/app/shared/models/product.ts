@@ -22,6 +22,7 @@ export interface Product {
   created_at: string;
   updated_at: string;
   imagenes: ProductImage[];
+  tiene_stock?: boolean;
 }
 
 export interface ProductListResponse {
