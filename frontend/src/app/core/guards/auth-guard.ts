@@ -10,13 +10,10 @@ export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  // Verificar si el usuario está autenticado
   if (authService.isLoggedIn()) {
-    return true; // ✅ Permitir acceso
+    return true; 
   }
 
-  // ❌ No autenticado - redirigir al login
-  // Guardar la URL a la que quería acceder
   router.navigate(['/login'], {
     queryParams: { returnUrl: state.url },
   });
@@ -32,18 +29,15 @@ export const adminGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  // Verificar autenticación
   if (!authService.isLoggedIn()) {
     router.navigate(['/login']);
     return false;
   }
 
-  // Verificar si es administrador
   if (authService.isAdmin()) {
-    return true; // ✅ Es admin, permitir acceso
+    return true;
   }
 
-  // ❌ No es admin - redirigir a inicio
   router.navigate(['/']);
   alert('No tienes permisos de administrador para acceder a esta página');
 

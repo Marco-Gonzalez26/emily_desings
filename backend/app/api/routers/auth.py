@@ -1,9 +1,3 @@
-"""
-AUTH ROUTER
-Endpoints: register, login, get current user
-
-"""
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session

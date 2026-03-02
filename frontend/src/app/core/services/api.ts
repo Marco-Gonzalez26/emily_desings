@@ -17,10 +17,33 @@ export class ApiService {
   /**
    * GET request
    */
-  get<T>(endpoint: string, params?: HttpParams): Observable<T> {
-    return this.http.get<T>(`${this.apiUrl}${endpoint}`, { params });
-  }
 
+  // Sobrecarga para blob
+  get(endpoint: string, options: { responseType: 'blob' }): Observable<Blob>;
+
+  // Sobrecarga para JSON
+  get<T>(
+    endpoint: string,
+    options?: {
+      params?: HttpParams;
+      headers?: HttpHeaders;
+    },
+  ): Observable<T>;
+
+  get<T>(
+    endpoint: string,
+    options?: {
+      params?: HttpParams;
+      headers?: HttpHeaders;
+      responseType?: 'json' | 'blob';
+    },
+  ): Observable<T> | Observable<Blob> {
+    return this.http.get(`${this.apiUrl}${endpoint}`, {
+      headers: options?.headers,
+      params: options?.params,
+      responseType: (options?.responseType as any) || 'json',
+    }) as any;
+  }
   /**
    * POST request
    */

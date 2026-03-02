@@ -28,7 +28,7 @@ export class ProductoService {
       });
     }
 
-    return this.api.get<ProductListResponse>('/api/productos/', params);
+    return this.api.get<ProductListResponse>('/api/productos/', { params });
   }
 
   getProductById(id: string): Observable<Product> {
@@ -37,17 +37,17 @@ export class ProductoService {
 
   getFeatured(limit: number = 10): Observable<Product[]> {
     const params = new HttpParams().set('limit', limit.toString());
-    return this.api.get<Product[]>('/api/productos/destacados', params);
+    return this.api.get<Product[]>('/api/productos/destacados', { params });
   }
 
   getNew(limit: number = 10): Observable<Product[]> {
     const params = new HttpParams().set('limit', limit.toString());
-    return this.api.get<Product[]>('/api/productos/nuevos', params);
+    return this.api.get<Product[]>('/api/productos/nuevos', { params });
   }
 
   getOffers(limit: number = 10): Observable<Product[]> {
     const params = new HttpParams().set('limit', limit.toString());
-    return this.api.get<Product[]>('/api/productos/ofertas', params);
+    return this.api.get<Product[]>('/api/productos/ofertas', { params });
   }
 
   createProduct(data: ProductCreate): Observable<Product> {

@@ -1,0 +1,418 @@
+<!-- src/app/features/analisis-morfologico/analisis-morfologico.component.html -->
+
+<div class="min-h-screen bg-emily-cream py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-serif font-bold text-emily-dark mb-3">Análisis de Tipo de Cuerpo</h1>
+      <p class="text-base text-emily-taupe max-w-3xl mx-auto">
+        Descubre tu silueta ideal y encuentra el estilo perfecto para ti. Recibe recomendaciones de
+        moda personalizadas. ¡Solo tu foto y dejanos ayudarte!
+      </p>
+    </div>
+
+    <!-- Body Types Section -->
+    <div class="bg-emily-white rounded-lg shadow-sm p-8 mb-8">
+      <h2 class="text-2xl font-serif font-semibold text-center text-emily-dark mb-8">
+        Identifica tu Silueta
+      </h2>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        <!-- Triángulo Invertido -->
+        <div class="text-center">
+          <div class="mb-3 flex justify-center">
+            <svg class="w-20 h-32 text-emily-rose/40" viewBox="0 0 100 150" fill="currentColor">
+              <path d="M10,20 L90,20 L75,80 L70,120 L60,140 L40,140 L30,120 L25,80 Z" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-sm text-emily-dark mb-1">Triángulo Invertido</h3>
+          <p class="text-xs text-emily-taupe">Hombros más anchos que caderas</p>
+        </div>
+
+        <!-- Rectángulo -->
+        <div class="text-center">
+          <div class="mb-3 flex justify-center">
+            <svg class="w-20 h-32 text-emily-rose/40" viewBox="0 0 100 150" fill="currentColor">
+              <path d="M30,20 L70,20 L70,80 L68,120 L60,140 L40,140 L32,120 L30,80 Z" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-sm text-emily-dark mb-1">Rectángulo</h3>
+          <p class="text-xs text-emily-taupe">Hombros y caderas alineados, cintura recta</p>
+        </div>
+
+        <!-- Reloj de Arena -->
+        <div class="text-center">
+          <div class="mb-3 flex justify-center">
+            <svg class="w-20 h-32 text-emily-rose/40" viewBox="0 0 100 150" fill="currentColor">
+              <path
+                d="M25,20 L75,20 L68,50 L50,70 L68,90 L75,130 L65,140 L35,140 L25,130 L32,90 L50,70 L32,50 Z"
+              />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-sm text-emily-dark mb-1">Reloj de Arena</h3>
+          <p class="text-xs text-emily-taupe">Hombros y caderas balanceados, cintura definida</p>
+        </div>
+
+        <!-- Pera (Triángulo) -->
+        <div class="text-center">
+          <div class="mb-3 flex justify-center">
+            <svg class="w-20 h-32 text-emily-rose/40" viewBox="0 0 100 150" fill="currentColor">
+              <path
+                d="M35,20 L65,20 L68,50 L70,80 L75,110 L68,130 L60,140 L40,140 L32,130 L25,110 L30,80 L32,50 Z"
+              />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-sm text-emily-dark mb-1">Pera</h3>
+          <p class="text-xs text-emily-taupe">Caderas más anchas que hombros</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload Section -->
+    @if (estado() === 'inicial' || estado() === 'error') {
+      <div class="bg-emily-white rounded-lg shadow-sm p-8 mb-8">
+        <!-- Upload Icon & Text -->
+        <div class="text-center mb-6">
+          <div
+            class="inline-flex items-center justify-center w-24 h-24 bg-emily-cream rounded-full mb-4"
+          >
+            <svg
+              class="w-12 h-12 text-emily-taupe"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+              />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+          </div>
+          <h3 class="text-xl font-serif font-semibold text-emily-dark mb-2">Sube tu Foto</h3>
+          <p class="text-sm text-emily-taupe mb-4">
+            Arrastra y suelta tu imagen aquí o haz clic para seleccionar.<br />
+            Formatos aceptados: .JPG, .PNG, etc.
+          </p>
+        </div>
+
+        <!-- Drag & Drop Zone -->
+        <div
+          class="relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-300 mb-6"
+          [class.border-emily-rose]="isDragging()"
+          [class.border-emily-taupe/30]="!isDragging()"
+          [class.bg-emily-rose/10]="isDragging()"
+          [class.bg-emily-light]="!isDragging()"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+        >
+          @if (imagenPreview()) {
+            <img
+              [src]="imagenPreview()!"
+              alt="Preview"
+              class="max-h-80 mx-auto rounded-lg object-contain"
+            />
+          } @else {
+            <svg
+              class="mx-auto h-16 w-16 text-emily-taupe/40 mb-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+              />
+            </svg>
+            <p class="text-emily-taupe text-sm">Arrastra tu foto aquí</p>
+          }
+
+          <input
+            #fileInput
+            type="file"
+            accept="image/*"
+            class="hidden"
+            (change)="onFileSelected($event)"
+          />
+        </div>
+
+        <!-- Browse Button -->
+        <div class="text-center mb-6">
+          <button
+            type="button"
+            (click)="fileInput.click()"
+            class="inline-flex items-center px-6 py-2.5 border border-emily-taupe/30 rounded-lg text-sm font-medium text-emily-dark bg-emily-white hover:bg-emily-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emily-rose transition-colors"
+          >
+            Examinar...
+          </button>
+        </div>
+
+        <!-- Error Message -->
+        @if (tieneError()) {
+          <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <p class="text-sm text-red-800 text-center">{{ mensajeError() }}</p>
+          </div>
+        }
+
+        <!-- Analyze Button -->
+        @if (imagenSeleccionada()) {
+          <div class="text-center">
+            <button
+              (click)="analizarImagen()"
+              class="px-8 py-3 bg-emily-rose hover:bg-emily-rose/90 text-emily-white rounded-lg font-medium transition-colors shadow-sm hover:shadow-md"
+            >
+              Analizar mi Cuerpo
+            </button>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (estaCargando()) {
+      <div class="bg-emily-white rounded-lg shadow-sm p-12">
+        <div class="text-center">
+          <!-- Hourglass Animation -->
+          <div class="flex justify-center mb-6">
+            <svg
+              class="w-24 h-24 text-emily-rose animate-pulse"
+              viewBox="0 0 100 150"
+              fill="currentColor"
+            >
+              <path
+                d="M20,10 L80,10 L75,30 L50,70 L75,110 L80,130 L20,130 L25,110 L50,70 L25,30 Z"
+              />
+            </svg>
+          </div>
+
+          <h3 class="text-xl font-serif font-semibold text-emily-dark mb-3">
+            Analizando tu Imagen
+          </h3>
+          <p class="text-emily-taupe mb-6">
+            Estamos procesando tu foto con inteligencia artificial...
+          </p>
+
+          <!-- Progress Bar -->
+          <div class="max-w-md mx-auto">
+            <div class="w-full bg-emily-light rounded-full h-2">
+              <div
+                class="bg-emily-rose h-2 rounded-full transition-all duration-500"
+                [style.width.%]="porcentajeProgreso()"
+              ></div>
+            </div>
+            <p class="text-sm text-emily-taupe mt-2">{{ porcentajeProgreso() }}%</p>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Results Section -->
+    @if (tieneResultado() && resultado()) {
+      <div id="resultados" class="space-y-8">
+        <!-- Result Card -->
+        <div class="bg-emily-white rounded-lg shadow-sm p-8">
+          <div class="flex items-start justify-between mb-6">
+            <div>
+              <h2 class="text-2xl font-serif font-semibold text-emily-dark mb-2">
+                Resultados Personalizados
+              </h2>
+              <p class="text-emily-taupe">
+                Tu Silueta:
+                <span class="font-semibold text-emily-rose">{{ resultado()!.tipo_cuerpo }}</span
+                >.
+                @if (tipoCuerpoInfo()) {
+                  {{ tipoCuerpoInfo()!.descripcion }}
+                }
+              </p>
+            </div>
+
+            <button
+              (click)="nuevoAnalisis()"
+              class="px-4 py-2 border border-emily-taupe/30 rounded-lg text-sm text-emily-dark hover:bg-emily-light transition-colors"
+            >
+              Nuevo Análisis
+            </button>
+          </div>
+
+          <!-- Confidence -->
+          <div class="bg-emily-cream rounded-lg p-4 mb-6">
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-emily-dark">Nivel de confianza:</span>
+              <div class="flex items-center">
+                <div class="w-32 bg-emily-white rounded-full h-2 mr-3">
+                  <div
+                    class="bg-emily-rose h-2 rounded-full"
+                    [style.width.%]="resultado()!.confianza * 100"
+                  ></div>
+                </div>
+                <span class="text-sm font-semibold text-emily-dark">
+                  {{ (resultado()!.confianza * 100).toFixed(1) }}%
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recommendations Header -->
+        <div class="bg-emily-white rounded-lg shadow-sm p-6">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xl font-serif font-semibold text-emily-dark">
+              Prendas Recomendadas para Ti
+            </h3>
+
+            <button
+              (click)="regenerarRecomendaciones()"
+              class="text-sm text-emily-rose hover:text-emily-rose/80 font-medium transition-colors"
+            >
+              🔄 Regenerar
+            </button>
+          </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          @for (producto of resultado()!.recomendaciones; track producto.id) {
+            <div
+              (click)="verProducto(producto)"
+              class="bg-emily-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden group"
+            >
+              <!-- Image -->
+              <div class="relative h-64 bg-emily-light overflow-hidden">
+                @if (producto.imagen_principal) {
+                  <img
+                    [src]="producto.imagen_principal"
+                    [alt]="producto.nombre"
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                } @else {
+                  <div class="flex items-center justify-center h-full bg-emily-light">
+                    <svg
+                      class="h-20 w-20 text-emily-taupe/30"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </div>
+                }
+
+                <!-- Wishlist Button -->
+                <button
+                  class="absolute top-3 right-3 p-2 bg-emily-white rounded-full shadow-sm hover:bg-emily-light transition-colors"
+                  (click)="$event.stopPropagation()"
+                >
+                  <svg
+                    class="w-5 h-5 text-emily-taupe hover:text-emily-rose transition-colors"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
+                  </svg>
+                </button>
+
+                <!-- Discount Badge -->
+                @if (producto.precio_descuento) {
+                  <div
+                    class="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+                  >
+                    -{{ getDiscountPercent(producto.precio_descuento, producto.precio_regular) }}%
+                  </div>
+                }
+              </div>
+
+              <!-- Content -->
+              <div class="p-4">
+                <!-- Category & Brand -->
+                <div class="flex items-center justify-between text-xs text-emily-taupe mb-2">
+                  <span>{{ producto.categoria }}</span>
+                  @if (producto.marca) {
+                    <span>{{ producto.marca }}</span>
+                  }
+                </div>
+
+                <!-- Title -->
+                <h4 class="text-sm font-medium text-emily-dark mb-2 line-clamp-2 h-10">
+                  {{ producto.nombre }}
+                </h4>
+
+                <!-- AI Reason (Compact) -->
+                <p class="text-xs text-emily-taupe mb-3 line-clamp-2 italic">
+                  "{{ producto.razon }}"
+                </p>
+
+                <!-- Price & Add to Cart -->
+                <div class="flex items-center justify-between pt-3 border-t border-emily-light">
+                  <div>
+                    @if (producto.precio_descuento) {
+                      <div>
+                        <span class="text-lg font-bold text-emily-dark">
+                          {{ formatearPrecio(producto.precio_descuento) }}
+                        </span>
+                        <span class="text-xs text-emily-taupe line-through ml-1">
+                          {{ formatearPrecio(producto.precio_regular) }}
+                        </span>
+                      </div>
+                    } @else {
+                      <span class="text-lg font-bold text-emily-dark">
+                        {{ formatearPrecio(producto.precio_regular) }}
+                      </span>
+                    }
+                  </div>
+
+                  <button
+                    (click)="agregarAlCarrito(producto, $event)"
+                    class="px-4 py-2 bg-emily-rose hover:bg-emily-rose/90 text-emily-white text-sm rounded-lg transition-colors shadow-sm"
+                  >
+                    Añadir al Carrito
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+@if (productoParaAgregar()) {
+  <app-quick-add-modal
+    [producto]="productoParaAgregar()!"
+    [isOpen]="modalAbierto()"
+    (close)="onCloseModal()"
+    (addToCart)="onAddToCart($event)"
+  >
+  </app-quick-add-modal>
+}
+
+@if (productoParaAgregar()) {
+  <app-quick-add-modal
+    [producto]="productoParaAgregar()!"
+    [isOpen]="modalAbierto()"
+    (close)="onCloseModal()"
+    (addToCart)="onAddToCart($event)"
+  >
+  </app-quick-add-modal>
+}

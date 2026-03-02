@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './features/home/home.component';
-import { MorphologyAnalysisComponent } from './features/morfologic-analysis/morphology-analysis';
+import { MorphologyAnalysisComponent } from './features/morfologic-analysis/morphology-analysis.component';
 import { AboutUsComponent } from './features/about-us/about-us';
 import { LoginComponent } from './features/auth/login/login';
 import { AuthLayoutComponent } from './layout/auth/auth';
@@ -15,6 +15,7 @@ import { CheckoutCancelComponent } from './features/checkout-cancel/checkout-can
 import { CheckoutSuccessComponent } from './features/checkout-success/checkout-success.component';
 import { OrdersComponent } from './features/orders/orders.component';
 import { OrderDetailComponent } from './features/order-detail/order-detail.component';
+import { adminRoutes } from '../admin.routes';
 
 export const routes: Routes = [
   {
@@ -43,5 +44,9 @@ export const routes: Routes = [
     path: 'crear-cuenta',
     component: AuthLayoutComponent,
     children: [{ path: '', component: RegisterComponent }],
+  },
+  {
+    path: 'admin',
+    loadChildren: () => adminRoutes,
   },
 ];

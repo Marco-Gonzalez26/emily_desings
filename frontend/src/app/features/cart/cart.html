@@ -78,7 +78,8 @@
                     {{ item.producto?.nombre ?? 'Producto' }}
                   </a>
                   <p class="text-xs text-emily-taupe mt-0.5">
-                    Talla: {{ item.talla_id }} · Color: {{ item.color_id }}
+                    Talla: {{ item.talla?.abreviatura }} ({{ item.talla?.nombre }})· Color:
+                    {{ item.color?.nombre }}
                   </p>
                   <p class="text-sm font-semibold text-emily-dark mt-1">
                     ${{ cartService.getItemPrice(item) | number: '1.2-2' }}

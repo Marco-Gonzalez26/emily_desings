@@ -27,7 +27,6 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
@@ -51,21 +50,20 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(credentials).subscribe({
       next: (response) => {
-        console.log('Login exitoso:', response);
+        console.log('Login aqui -> ', response);
         this.isLoading = false;
 
         // Redirigir según el rol
         if (response.user.rol === 'administrador') {
-          this.router.navigate(['/admin/dashboard']);
+          this.router.navigate(['/admin']);
         } else {
-          this.router.navigate(['/']); // Todo: Redireccionar al home
+          this.router.navigate(['/catalogo']);
         }
       },
       error: (error) => {
-        console.error('Error en login:', error);
+        console.error('Error en el login:', error);
         this.isLoading = false;
 
-        // Mostrar mensaje de error
         if (error.status === 401) {
           this.errorMessage = 'Email o contraseña incorrectos';
         } else if (error.status === 403) {

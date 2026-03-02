@@ -8,6 +8,7 @@ import { MessageService } from 'primeng/api';
 import { CartService } from '../../core/services/cart.service';
 import { OrdenService } from '../../core/services/order.service';
 import { OrdenCreate, OrdenItem } from '../../shared/models/order';
+import { AuthService } from '../../core/services/auth';
 
 @Component({
   selector: 'app-checkout',
@@ -26,6 +27,7 @@ export class CheckoutComponent implements OnInit {
     public cartService: CartService,
     private ordenService: OrdenService,
     private messageService: MessageService,
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
@@ -36,10 +38,19 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
+    const currentUser = this.authService.currentUser();
+
     this.shippingForm = this.fb.group({
-      nombre: ['', Validators.required],
-      telefono: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
-      direccion: ['', Validators.required],
+      nombre: [currentUser?.nombre_completo || '', Validators.required],
+      cedula: [
+        currentUser?.cedula_ruc || '',
+        [Validators.required, Validators.pattern(/^[0-9]{10,13}$/)],
+      ],
+      telefono: [
+        currentUser?.telefono || '',
+        [Validators.required, Validators.pattern(/^[0-9]{10}$/)],
+      ],
+      direccion: [currentUser?.direccion || '', Validators.required],
       ciudad: ['', Validators.required],
       provincia: ['', Validators.required],
       codigoPostal: ['', Validators.required],
@@ -91,7 +102,7 @@ export class CheckoutComponent implements OnInit {
     this.isProcessing.set(true);
 
     const formValues = this.shippingForm.value;
-    const direccionCompleta = `${formValues.nombre}, ${formValues.telefono}, ${formValues.direccion}, ${formValues.ciudad}, ${formValues.provincia}, ${formValues.codigoPostal}`;
+    const direccionCompleta = `${formValues.direccion}, ${formValues.ciudad}, ${formValues.provincia}, ${formValues.codigoPostal}`;
 
     const items: OrdenItem[] = this.cartService.items().map((item) => ({
       producto_id: item.producto_id,

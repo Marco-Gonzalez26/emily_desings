@@ -5,10 +5,10 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { jamArrowLeft, jamCalendar, jamMapMarker, jamCreditCard } from '@ng-icons/jam-icons';
 import { Orden } from '../../shared/models/order';
 import { OrdenService } from '../../core/services/order.service';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-order-detail',
-  standalone: true,
   imports: [CommonModule, RouterModule, NgIconComponent],
   providers: [provideIcons({ jamArrowLeft, jamCalendar, jamMapMarker, jamCreditCard })],
   templateUrl: './order-detail.component.html',
@@ -30,6 +30,7 @@ export class OrderDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private ordenService: OrdenService,
+    private messageService: MessageService,
   ) {}
 
   ngOnInit(): void {
@@ -67,6 +68,26 @@ export class OrderDetailComponent implements OnInit {
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
+    });
+  }
+
+  downloadReceipt(): void {
+    this.ordenService.descargarPDF(this.orden()!.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${this.orden()!.numero_orden}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error al descargar recibo',
+          detail: 'Intenta nuevamente',
+        });
+      },
     });
   }
 }

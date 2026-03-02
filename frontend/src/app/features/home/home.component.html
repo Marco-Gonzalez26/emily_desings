@@ -1,4 +1,3 @@
-<!-- Hero Section -->
 <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
   <div class="absolute inset-0 z-0">
     <img
@@ -20,11 +19,12 @@
         Descubre moda curada de Emily Designs. Quevedo, estética, accesibilidad y estilismo para el
         individuo moderno.
       </p>
-      <button
-        class="hero-button bg-white text-neutral-900 px-8 py-4 rounded-md font-medium text-base hover:bg-neutral-100 transition-colors shadow-lg"
+      <a
+        routerLink="/catalogo"
+        class="hero-button inline-block bg-white text-neutral-900 px-8 py-4 rounded-md font-medium text-base hover:bg-neutral-100 transition-colors shadow-lg"
       >
         Comprar la Colección
-      </button>
+      </a>
     </div>
   </div>
 
@@ -41,26 +41,29 @@
 </section>
 
 <!-- Primera Sección de Scroll Horizontal -->
-<section #cardsContainer1 class="relative overflow-hidden bg-neutral-50">
+<section #cardsContainer1 class="relative overflow-hidden bg-emily-cream/30">
   <div class="py-20 md:py-32">
     <div class="text-center mb-16 px-6 md:px-8">
-      <h2 class="text-4xl md:text-5xl font-serif font-bold text-neutral-900 mb-4">
+      <h2 class="text-4xl md:text-5xl font-serif font-bold text-emily-dark mb-4">
         Explora Nuestro Mundo
       </h2>
-      <p class="text-lg text-neutral-600 max-w-2xl mx-auto">
+      <p class="text-lg text-emily-taupe max-w-2xl mx-auto">
         Desliza para descubrir nuestras colecciones
       </p>
     </div>
 
     <div #cardsWrapper1 class="flex gap-8 px-6 md:px-8" style="width: max-content">
-      <div *ngFor="let card of cards1()" class="shrink-0 w-[85vw] md:w-[45vw] lg:w-[35vw]">
-        <!-- <app-card
-          [image]="card.image"
-          [title]="card.title"
-          [description]="card.description"
-          [buttonText]="card.buttonText"
-        ></app-card> -->
-      </div>
+      @for (card of cards1(); track card.title) {
+        <div class="shrink-0 w-[85vw] md:w-[45vw] lg:w-[35vw]">
+          <app-home-product-card
+            [image]="card.image"
+            [title]="card.title"
+            [description]="card.description"
+            [buttonText]="card.buttonText"
+            [link]="card.link || ''"
+          />
+        </div>
+      }
     </div>
   </div>
 </section>
@@ -73,7 +76,7 @@
       alt="Análisis Morfológico"
       class="w-full h-full object-cover"
     />
-    <div class="absolute inset-0 bg-linear-to-r from-neutral-900/80 to-neutral-900/50"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-neutral-900/80 to-neutral-900/50"></div>
   </div>
 
   <div class="relative z-10 max-w-4xl mx-auto px-6 md:px-8 text-center text-white">
@@ -85,7 +88,7 @@
       resalten tu silueta y personalidad.
     </p>
     <a
-      href="/analisis-morfologico"
+      routerLink="/analisis-morfologico"
       class="cta-button inline-block bg-white text-neutral-900 px-10 py-4 rounded-md font-medium text-lg hover:bg-neutral-100 transition-all transform hover:scale-105 shadow-2xl"
     >
       Comenzar Análisis
@@ -93,57 +96,68 @@
   </div>
 </section>
 
-<!-- Segunda Sección de Scroll Horizontal -->
-<section #cardsContainer2 class="relative overflow-hidden bg-neutral-50">
+<!-- Segunda Sección de Scroll Horizontal - Productos Destacados -->
+<section #cardsContainer2 class="relative overflow-hidden bg-emily-light">
   <div class="py-20 md:py-32">
     <div class="text-center mb-16 px-6 md:px-8">
-      <h2 class="text-4xl md:text-5xl font-serif font-bold text-neutral-900 mb-4">
-        Más para Descubrir
+      <h2 class="text-4xl md:text-5xl font-serif font-bold text-emily-dark mb-4">
+        Productos Destacados
       </h2>
-      <p class="text-lg text-neutral-600 max-w-2xl mx-auto">
-        Continúa explorando nuestras propuestas
+      <p class="text-lg text-emily-taupe max-w-2xl mx-auto">
+        Nuestras prendas más populares y recomendadas
       </p>
     </div>
 
-    <div #cardsWrapper2 class="flex gap-8 px-6 md:px-8" style="width: max-content">
-      <div *ngFor="let card of cards2()" class="shrink-0 w-[85vw] md:w-[45vw] lg:w-[35vw]">
-        <!-- <app-card
-          [image]="card.image"
-          [title]="card.title"
-          [description]="card.description"
-          [buttonText]="card.buttonText"
-        ></app-card> -->
+    @if (productosDestacados().length > 0) {
+      <div
+        #cardsWrapper2
+        class="flex gap-8 px-6 md:px-8"
+        style="width: max-content"
+        id="cardsWrapper2"
+      >
+        @for (producto of productosDestacados(); track producto.id) {
+          <div class="shrink-0 w-[85vw] md:w-[45vw] lg:w-[35vw]">
+            <app-home-product-card
+              [image]="getProductImage(producto)"
+              [title]="producto.nombre"
+              [description]="producto.descripcion || ''"
+              [buttonText]="'$' + getProductPrice(producto).toFixed(2)"
+              [link]="'/producto/' + producto.id"
+            />
+          </div>
+        }
       </div>
-    </div>
+    } @else {
+      <div class="text-center text-emily-taupe">
+        <p>Cargando productos destacados...</p>
+      </div>
+    }
   </div>
 </section>
 
-<!-- CTA Final - ¡Súper Llamativo! -->
 <section
   #finalCTA
-  class="relative min-h-screen flex items-center justify-center overflow-hidden p-8"
+  class="relative min-h-screen flex items-center justify-center overflow-hidden p-8 bg-linear-to-br from-emily-cream via-emily-light to-emily-rose/10"
 >
-  <!-- Elementos decorativos flotantes -->
-
   <div class="relative z-10 max-w-4xl mx-auto px-6 md:px-8 text-center">
-    <!-- Título principal -->
-    <h2 class="text-5xl font-serif font-bold mb-6 leading-tight">
+    <h2
+      class="final-title text-5xl md:text-6xl font-serif font-bold mb-6 leading-tight text-emily-dark"
+    >
       ¿Lista para Transformar<br />tu Guardarropa?
     </h2>
 
-    <!-- Subtítulo -->
     <p
-      class="final-subtitle text-xl md:text-2xl mb-12 text-neutral-700 max-w-2xl mx-auto leading-relaxed"
+      class="final-subtitle text-xl md:text-2xl mb-12 text-emily-taupe max-w-2xl mx-auto leading-relaxed"
     >
       Descubre qué prendas resaltan tu figura con nuestro análisis morfológico profesional.
-      <span class="block mt-2 text-violet-800 font-semibold">¡Completamente GRATIS!</span>
+      <span class="block mt-2 text-emily-gold font-semibold">¡Completamente GRATIS!</span>
     </p>
 
-    <!-- Botón animado -->
-    <button
-      class="group group-hover:before:duration-500 group-hover:after:duration-500 after:duration-500 hover:border-rose-300 hover:before:[box-shadow:20px_20px_20px_30px_#a21caf] duration-500 before:duration-500 hover:duration-500 underline underline-offset-2 hover:after:-right-8 hover:before:right-12 hover:before:-bottom-8 hover:before:blur hover:underline hover:underline-offset-4 origin-left hover:decoration-2 hover:text-white relative bg-neutral-800 h-16 w-64 border text-left p-3 text-gray-50 text-base font-bold rounded-lg overflow-hidden before:absolute before:w-12 before:h-12 before:content[''] before:right-1 before:top-1 before:z-10 before:bg-violet-500 before:rounded-full before:blur-lg after:absolute after:z-10 after:w-20 after:h-20 after:content[''] after:bg-rose-300 after:right-8 after:top-3 after:rounded-full after:blur-lg"
+    <a
+      routerLink="/analisis-morfologico"
+      class="final-button inline-block group group-hover:before:duration-500 group-hover:after:duration-500 after:duration-500 hover:border-emily-rose hover:before:[box-shadow:20px_20px_20px_30px_#D4A5A5] duration-500 before:duration-500 hover:duration-500 underline underline-offset-2 hover:after:-right-8 hover:before:right-12 hover:before:-bottom-8 hover:before:blur hover:underline hover:underline-offset-4 origin-left hover:decoration-2 hover:text-white relative bg-emily-dark h-16 w-64 border text-left p-3 text-emily-white text-base font-bold rounded-lg overflow-hidden before:absolute before:w-12 before:h-12 before:content[''] before:right-1 before:top-1 before:z-10 before:bg-emily-gold before:rounded-full before:blur-lg after:absolute after:z-10 after:w-20 after:h-20 after:content[''] after:bg-emily-rose after:right-8 after:top-3 after:rounded-full after:blur-lg"
     >
       Comenzar Ahora
-    </button>
+    </a>
   </div>
 </section>

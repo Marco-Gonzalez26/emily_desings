@@ -2,15 +2,16 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import List
-
+from fastapi.responses import StreamingResponse
+from app.services.pdf_service import generar_pdf_orden
 from app.db.config import get_db
 from app.utils.auth_dependencies import get_current_user
 from app.models.models import Usuario
 from app.schemas.schemas import (
-    OrdenCreate, 
-    OrdenResponse, 
-    StripeCheckoutRequest, 
-    StripeCheckoutResponse
+    OrdenCreate,
+    OrdenResponse,
+    StripeCheckoutRequest,
+    StripeCheckoutResponse,
 )
 from app.services import order_service
 
@@ -70,3 +71,23 @@ def detalle_orden(
 ):
     """Obtener detalle de una orden"""
     return order_service.get_orden_by_id(db, orden_id, current_user)
+
+
+@router.get("/{orden_id}/pdf")
+def descargar_pdf_orden(
+    orden_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user),
+):
+    """Descargar PDF de la orden"""
+    orden = order_service.get_orden_by_id(db, orden_id, current_user)
+
+    pdf_buffer = generar_pdf_orden(orden)
+
+    return StreamingResponse(
+        pdf_buffer,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename=orden_{orden.numero_orden}.pdf"
+        },
+    )

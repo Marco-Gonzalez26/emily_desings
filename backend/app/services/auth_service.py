@@ -1,8 +1,3 @@
-"""
-AUTH SERVICE
-Manages business logic for user registration, login and user validation
-"""
-
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from datetime import timedelta
@@ -10,6 +5,7 @@ from uuid import UUID
 
 from app.models.models import Usuario
 from app.schemas.schemas import UsuarioCreate, UserLogin
+from app.utils.validators import validar_cedula_ruc
 from app.utils.auth_security import (
     get_password_hash,
     verify_password,
@@ -48,6 +44,10 @@ def create_user(db: Session, user: UsuarioCreate) -> Usuario:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="El email ya está registrado",
+        )
+    if user.cedula_ruc and not validar_cedula_ruc(user.cedula_ruc):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Cédula o RUC inválido"
         )
 
     # Crear nuevo usuario con contraseña hasheada

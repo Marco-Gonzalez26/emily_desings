@@ -128,6 +128,12 @@
               >${{ orden()!.total | number: '1.2-2' }}</span
             >
           </div>
+          <button
+            (click)="downloadReceipt()"
+            class="mt-6 w-full block text-center bg-emily-gold hover:bg-emily-taupe text-emily-white font-semibold py-3 rounded-xl transition"
+          >
+            Descargar Recibo PDF
+          </button>
         </div>
       </div>
     </div>

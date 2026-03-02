@@ -223,3 +223,87 @@ def eliminar_producto(
         soft_delete=not permanente,
     )
     return None
+
+
+@router.get("/{producto_id}/variantes")
+def obtener_variantes_producto(producto_id: UUID, db: Session = Depends(get_db)):
+    """
+    Obtiene tallas y colores disponibles de un producto para Quick Add Modal
+
+    Endpoint público usado por el componente de análisis morfológico
+    para mostrar las opciones disponibles antes de agregar al carrito.
+
+    Args:
+        producto_id: UUID del producto
+
+    Returns:
+        {
+            "producto_id": "uuid",
+            "nombre": "Vestido Elegante",
+            "precio_regular": 79.99,
+            "precio_descuento": 59.99,
+            "imagen_principal": "url",
+            "tallas_disponibles": [
+                {"id": "uuid", "nombre": "S", "stock": 5}
+            ],
+            "colores_disponibles": [
+                {"id": "uuid", "nombre": "Negro", "codigo_hex": "#000000"}
+            ]
+        }
+    """
+    # Obtener producto (ya tienes el servicio)
+    producto = product_service.get_producto_by_id(db, producto_id)
+
+    # Obtener inventario con tallas y colores
+    from app.models.models import Inventario
+
+    inventarios = db.query(Inventario).filter_by(producto_id=producto_id).all()
+
+    # Agrupar por talla
+    tallas_map = {}
+    colores_map = {}
+
+    for inv in inventarios:
+        # Tallas
+        if inv.talla_id and inv.talla:
+            if inv.talla_id not in tallas_map:
+                tallas_map[inv.talla_id] = {
+                    "id": str(inv.talla_id),
+                    "nombre": inv.talla.nombre,
+                    "stock": 0,
+                }
+            tallas_map[inv.talla_id]["stock"] += inv.stock
+
+        # Colores
+        if inv.color_id and inv.color:
+            if inv.color_id not in colores_map:
+                colores_map[inv.color_id] = {
+                    "id": str(inv.color_id),
+                    "nombre": inv.color.nombre,
+                    "codigo_hex": getattr(inv.color, "codigo_hex", None),
+                }
+
+    # Imagen principal (ya está en ProductoDetailResponse, reusar lógica)
+    imagen_principal = None
+    if producto.imagenes:
+        img_principal = next(
+            (img for img in producto.imagenes if img.es_principal), None
+        )
+        if img_principal:
+            imagen_principal = img_principal.url_imagen
+        elif len(producto.imagenes) > 0:
+            imagen_principal = producto.imagenes[0].url_imagen
+
+    return {
+        "producto_id": str(producto.id),
+        "nombre": producto.nombre,
+        "precio_regular": float(producto.precio_regular),
+        "precio_descuento": (
+            float(producto.precio_descuento) if producto.precio_descuento else None
+        ),
+        "imagen_principal": imagen_principal,
+        "tallas_disponibles": sorted(
+            list(tallas_map.values()), key=lambda x: x["nombre"]
+        ),
+        "colores_disponibles": list(colores_map.values()),
+    }

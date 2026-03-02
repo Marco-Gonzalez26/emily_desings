@@ -1,4 +1,6 @@
+import { Color } from './color';
 import { Product } from './product';
+import { Talla } from './size';
 
 export interface CartItem {
   id: string;
@@ -8,6 +10,9 @@ export interface CartItem {
   color_id: string;
   cantidad: number;
   precio_unitario: number | string;
+
+  talla?: Talla;
+  color?: Color;
   producto?: Product;
   created_at: string;
 }

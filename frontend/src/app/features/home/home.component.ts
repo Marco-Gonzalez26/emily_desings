@@ -6,28 +6,32 @@ import {
   ViewChild,
   PLATFORM_ID,
   Inject,
+  OnInit,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { ProductCardComponent } from '../../shared/components/product-card/product-card';
+import { HomeProductCardComponent } from './../../shared/components/home/home-product-card/home-product-card.component';
+import { HomeService } from '../../core/services/home.service';
+import { Product } from '../../shared/models/product';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { RouterLink } from '@angular/router';
 
 interface Card {
   image: string;
   title: string;
   description: string;
   buttonText: string;
+  link?: string;
 }
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, ProductCardComponent, RouterLink],
+  imports: [CommonModule, HomeProductCardComponent, RouterLink],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
-export class HomeComponent implements AfterViewInit {
+export class HomeComponent implements OnInit, AfterViewInit {
   @ViewChild('cardsContainer1') cardsContainer1!: ElementRef;
   @ViewChild('cardsWrapper1') cardsWrapper1!: ElementRef;
   @ViewChild('cardsContainer2') cardsContainer2!: ElementRef;
@@ -35,65 +39,67 @@ export class HomeComponent implements AfterViewInit {
   @ViewChild('ctaSection') ctaSection!: ElementRef;
   @ViewChild('finalCTA') finalCTA!: ElementRef;
 
+  // Cards estáticas para primera sección
   protected readonly cards1 = signal<Card[]>([
     {
-      image: '/Emi_Vestidorosa.jpeg',
-      title: 'Colecciones para toda la vida',
-      description: 'Descubre nuestra última colección con tonos pastel y telas fluidas.',
-      buttonText: 'Ver Todo',
+      image: '/analisis-morfologico.jpeg',
+      title: 'Análisis Morfológico',
+      description: 'Descubre las prendas perfectas que resaltan tu silueta y personalidad.',
+      buttonText: 'Comenzar',
+      link: '/analisis-morfologico',
     },
     {
-      image: '/analisis-morfologico.jpeg',
-      title: 'Analisis Morfologico',
-      description:
-        'Descubre nuestro análisis morfológico personalizado para encontrar las prendas perfectas que resaltan tu silueta y personalidad.',
-      buttonText: 'Comenzar',
+      image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800',
+      title: 'Nuevas Llegadas',
+      description: 'Explora nuestras últimas incorporaciones de moda.',
+      buttonText: 'Ver Todo',
+      link: '/catalogo?es_nuevo=true',
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800',
+      title: 'Ofertas Especiales',
+      description: 'Descuentos exclusivos en prendas seleccionadas.',
+      buttonText: 'Ver Ofertas',
+      link: '/catalogo?es_oferta=true',
     },
     {
       image: '/Emi_ModaLos80.jpeg',
       title: 'Hecho en Quevedo',
       description: 'Moda sostenible con prácticas éticas y artesanos locales.',
       buttonText: 'Conocer Más',
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800',
-      title: 'Esenciales Minimalistas',
-      description: 'Piezas atemporales que forman la base de tu guardarropa.',
-      buttonText: 'Explorar',
+      link: '/sobre-nosotros',
     },
   ]);
 
-  protected readonly cards2 = signal<Card[]>([
-    {
-      image: '/otono.jpeg',
-      title: 'Tendencias Otoño',
-      description: 'Colores tierra y texturas cálidas para la nueva temporada.',
-      buttonText: 'Descubrir',
-    },
-    {
-      image: '/accesorios.jpeg',
-      title: 'Accesorios Únicos',
-      description: 'Complementa tu look con piezas artesanales exclusivas.',
-      buttonText: 'Ver Colección',
-    },
-    {
-      image: '/casual.jpeg',
-      title: 'Estilo Casual',
-      description: 'Comodidad y elegancia para tu día a día.',
-      buttonText: 'Comprar',
-    },
-    {
-      image: '/Emi_Lafuria.jpeg',
-      title: 'Elegancia Nocturna',
-      description: 'Prendas sofisticadas para ocasiones especiales.',
-      buttonText: 'Ver Más',
-    },
-  ]);
+  // Productos destacados para segunda sección
+  protected readonly productosDestacados = signal<Product[]>([]);
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private homeService: HomeService,
+  ) {
     if (isPlatformBrowser(this.platformId)) {
       gsap.registerPlugin(ScrollTrigger);
     }
+  }
+
+  ngOnInit(): void {
+    // Cargar datos de la home
+    this.homeService.getHomeData(8).subscribe({
+      next: (data) => {
+        this.productosDestacados.set(data.destacados);
+
+        // Inicializar scroll horizontal de productos después de cargar datos
+        if (isPlatformBrowser(this.platformId)) {
+          setTimeout(() => {
+            this.initSecondScrollAnimation();
+          }, 100);
+        }
+      },
+      error: (error) => {
+        console.error('Error cargando datos de home:', error);
+      },
+    });
   }
 
   ngAfterViewInit(): void {
@@ -104,6 +110,16 @@ export class HomeComponent implements AfterViewInit {
     }
   }
 
+  getProductImage(product: Product): string {
+    const main = product.imagenes?.find((img) => img.es_principal);
+    return main?.url_imagen || product.imagenes?.[0]?.url_imagen || 'assets/images/placeholder.jpg';
+  }
+
+  getProductPrice(product: Product): number {
+    const price = product.precio_descuento || product.precio_regular;
+    return parseFloat(price as any) || 0;
+  }
+
   private initAnimations(): void {
     // Animación del hero
     gsap
@@ -112,7 +128,7 @@ export class HomeComponent implements AfterViewInit {
       .from('.hero-subtitle', { y: 30, opacity: 0, duration: 0.8, ease: 'power3.out' }, '-=0.6')
       .from('.hero-button', { y: 20, opacity: 0, duration: 0.6, ease: 'power3.out' }, '-=0.4');
 
-    // Primer scroll horizontal
+    // Primer scroll horizontal (datos estáticos)
     this.createHorizontalScroll(
       this.cardsContainer1.nativeElement,
       this.cardsWrapper1.nativeElement,
@@ -122,15 +138,19 @@ export class HomeComponent implements AfterViewInit {
     // Animación del CTA intermedio
     this.initCTAAnimation();
 
-    // Segundo scroll horizontal
-    this.createHorizontalScroll(
-      this.cardsContainer2.nativeElement,
-      this.cardsWrapper2.nativeElement,
-      true,
-    );
-
     // Animación del CTA final
     this.initFinalCTAAnimation();
+  }
+
+  private initSecondScrollAnimation(): void {
+    // Segundo scroll horizontal (datos asíncronos)
+    if (this.cardsContainer2 && this.cardsWrapper2) {
+      this.createHorizontalScroll(
+        this.cardsContainer2.nativeElement,
+        this.cardsWrapper2.nativeElement,
+        true,
+      );
+    }
   }
 
   private createHorizontalScroll(
@@ -185,7 +205,6 @@ export class HomeComponent implements AfterViewInit {
       .from(button, {
         y: 30,
         scale: 0.85,
-
         duration: 0.5,
         ease: 'power3.out',
       });
@@ -193,10 +212,9 @@ export class HomeComponent implements AfterViewInit {
 
   private initFinalCTAAnimation(): void {
     const section = this.finalCTA.nativeElement;
-    const badge = section.querySelector('.final-badge');
     const title = section.querySelector('.final-title');
     const subtitle = section.querySelector('.final-subtitle');
-    const button = section.querySelector('#uiverse');
+    const button = section.querySelector('.final-button');
 
     const timeline = gsap.timeline({
       scrollTrigger: {
@@ -208,13 +226,6 @@ export class HomeComponent implements AfterViewInit {
     });
 
     timeline
-      .from(badge, {
-        scale: 0,
-        rotation: -180,
-        opacity: 0,
-        duration: 0.6,
-        ease: 'back.out(1.7)',
-      })
       .from(
         title,
         {

@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.api.routers import (
     auth,
@@ -10,21 +11,57 @@ from app.api.routers import (
     sizes,
     colors,
     inventory,
+    analysis,
 )
 
+from app.models import (
+    Usuario,
+    TokenSesion,
+    TokenRecuperacion,
+    PerfilMorfologico,
+    # PreferenciaEstilo,
+    AnalisisMorfologico,
+    ReglasRecomendacion,
+    RecomendacionGenerada,
+    Marca,
+    Categoria,
+    Color,
+    Talla,
+    Producto,
+    ImagenProducto,
+    ProductoEtiquetaMorfologica,
+    Inventario,
+    Carrito,
+    CarritoItem,
+    Orden,
+    OrdenItem,
+    Comprobante,
+    HistorialProducto,
+    RecomendacionIA,
+    HistorialReporte,
+)
+from app.services import clasification_service
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.config import check_db_connection
+
+
+async def lifespan(app: FastAPI):
+    # Pre-cargar modelos
+    clasification_service.inicializar_modelos()
+    yield
+
 
 app = FastAPI(
     title="Emily Designs API",
     description="API de e-commerce con análisis morfológico",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO: Cambiar a la URL del front y del produccion
+    allow_origins=["http://localhost:4200"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -41,6 +78,7 @@ app.include_router(cart.router)
 app.include_router(sizes.router)
 app.include_router(colors.router)
 app.include_router(inventory.router)
+app.include_router(analysis.router)
 # app.include_router(usuarios.router, prefix="/api/usuarios", tags=["usuarios"])
 # app.include_router(carritos.router, prefix="/api/carritos", tags=["carritos"])
 

@@ -36,4 +36,10 @@ export class OrdenService {
   getOrdenById(ordenId: string): Observable<Orden> {
     return this.api.get<Orden>(`/api/ordenes/${ordenId}`);
   }
+
+  descargarPDF(ordenId: string): Observable<Blob> {
+    return this.api.get(`/api/ordenes/${ordenId}/pdf`, {
+      responseType: 'blob',
+    });
+  }
 }

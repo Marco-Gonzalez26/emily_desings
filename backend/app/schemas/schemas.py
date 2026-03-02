@@ -1,7 +1,3 @@
-"""
-Esquemas Pydantic para validación de datos en FastAPI
-"""
-
 from pydantic import BaseModel, EmailStr, Field, ConfigDict, field_validator
 from typing import Optional, List
 from datetime import datetime
@@ -12,6 +8,7 @@ from uuid import UUID
 class UsuarioBase(BaseModel):
     """Esquema base de usuario"""
 
+    cedula_ruc: Optional[str] = None
     email: EmailStr
     nombre_completo: Optional[str] = None
     telefono: Optional[str] = None
@@ -31,6 +28,8 @@ class UsuarioUpdate(BaseModel):
     nombre_completo: Optional[str] = None
     telefono: Optional[str] = None
     direccion: Optional[str] = None
+
+    cedula_ruc: Optional[str] = None
 
 
 class UsuarioResponse(UsuarioBase):
@@ -148,6 +147,54 @@ class ProductoFilter(BaseModel):
     search: Optional[str] = None
 
 
+class TallaBase(BaseModel):
+    nombre: str
+    abreviatura: Optional[str] = None
+    orden: int = 0
+    activo: bool = True
+
+
+class TallaCreate(TallaBase):
+    pass
+
+
+class TallaUpdate(BaseModel):
+    nombre: Optional[str] = None
+    abreviatura: Optional[str] = None
+    orden: Optional[int] = None
+    activo: Optional[bool] = None
+
+
+class TallaResponse(TallaBase):
+    id: UUID
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ColorBase(BaseModel):
+    nombre: str
+    codigo_hexadecimal: Optional[str] = None
+    activo: bool = True
+
+
+class ColorCreate(ColorBase):
+    pass
+
+
+class ColorUpdate(BaseModel):
+    nombre: Optional[str] = None
+    codigo_hexadecimal: Optional[str] = None
+    activo: Optional[bool] = None
+
+
+class ColorResponse(ColorBase):
+    id: UUID
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class CarritoItemBase(BaseModel):
     """Esquema base de item de carrito"""
 
@@ -174,8 +221,11 @@ class CarritoItemResponse(BaseModel):
     color_id: UUID
     cantidad: int
     precio_unitario: Decimal
-    producto: Optional["ProductoResponse"] = None  # ← Incluir producto
+    producto: Optional["ProductoResponse"] = None
     created_at: datetime
+    talla: Optional[TallaResponse] = None
+
+    color: Optional[ColorResponse] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -224,7 +274,7 @@ class OrdenItemResponse(BaseModel):
     cantidad: int
     precio_unitario: Decimal
     subtotal: Decimal
-    producto: Optional['ProductoResponse'] = None  
+    producto: Optional["ProductoResponse"] = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -450,57 +500,6 @@ class CatalogoHomeResponse(BaseModel):
     marcas: List[MarcaResponse]
 
 
-# Agrega estos schemas en tu schemas.py
-
-
-class TallaBase(BaseModel):
-    nombre: str
-    abreviatura: Optional[str] = None
-    orden: int = 0
-    activo: bool = True
-
-
-class TallaCreate(TallaBase):
-    pass
-
-
-class TallaUpdate(BaseModel):
-    nombre: Optional[str] = None
-    abreviatura: Optional[str] = None
-    orden: Optional[int] = None
-    activo: Optional[bool] = None
-
-
-class TallaResponse(TallaBase):
-    id: UUID
-    created_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class ColorBase(BaseModel):
-    nombre: str
-    codigo_hexadecimal: Optional[str] = None
-    activo: bool = True
-
-
-class ColorCreate(ColorBase):
-    pass
-
-
-class ColorUpdate(BaseModel):
-    nombre: Optional[str] = None
-    codigo_hexadecimal: Optional[str] = None
-    activo: Optional[bool] = None
-
-
-class ColorResponse(ColorBase):
-    id: UUID
-    created_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 class InventarioProductoResponse(BaseModel):
     """Inventario con relaciones para mostrar en detalle de producto"""
 
@@ -514,3 +513,145 @@ class InventarioProductoResponse(BaseModel):
     color: Optional[ColorResponse] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class AnalisisMorfologicoBase(BaseModel):
+    """Base para análisis morfológico"""
+
+    tipo_cuerpo_detectado: str = Field(
+        ..., description="Tipo de cuerpo detectado por IA"
+    )
+    confianza: Optional[Decimal] = Field(
+        None, ge=0, le=1, description="Nivel de confianza del modelo (0.0 - 1.0)"
+    )
+
+    @field_validator("tipo_cuerpo_detectado")
+    def validar_tipo(cls, v):
+        return validar_tipo_cuerpo(v)
+
+
+class AnalisisMorfologicoCreate(AnalisisMorfologicoBase):
+    """Schema para crear análisis"""
+
+    # No necesita usuario_id, se toma del token
+    pass
+
+
+class AnalisisMorfologicoResponse(AnalisisMorfologicoBase):
+    """Schema de respuesta de análisis"""
+
+    id: UUID
+    usuario_id: UUID
+    fecha_analisis: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class ReglasRecomendacionBase(BaseModel):
+    """Base para reglas de recomendación"""
+
+    tipo_cuerpo: str
+    categoria_id: UUID
+    prioridad: int = Field(..., ge=1, le=3, description="1=Alta, 2=Media, 3=Baja")
+    razon: str = Field(..., min_length=10, max_length=500)
+    evitar: bool = False
+    activo: bool = True
+
+    @field_validator("tipo_cuerpo")
+    def validar_tipo(cls, v):
+        return validar_tipo_cuerpo(v)
+
+
+class ReglasRecomendacionCreate(ReglasRecomendacionBase):
+    """Schema para crear regla"""
+
+    pass
+
+
+class ReglasRecomendacionUpdate(BaseModel):
+    """Schema para actualizar regla"""
+
+    prioridad: Optional[int] = Field(None, ge=1, le=3)
+    razon: Optional[str] = Field(None, min_length=10, max_length=500)
+    evitar: Optional[bool] = None
+    activo: Optional[bool] = None
+
+
+class ReglasRecomendacionResponse(ReglasRecomendacionBase):
+    """Schema de respuesta de regla"""
+
+    id: UUID
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class RecomendacionGeneradaBase(BaseModel):
+    """Base para recomendación generada"""
+
+    analisis_id: UUID
+    producto_id: UUID
+    razon_ia: Optional[str] = None
+    palabras_clave: Optional[List[str]] = []
+    score: Optional[int] = None
+    posicion: Optional[int] = Field(None, ge=1, le=10)
+
+
+class RecomendacionGeneradaCreate(RecomendacionGeneradaBase):
+    """Schema para crear recomendación"""
+
+    pass
+
+
+class RecomendacionGeneradaResponse(RecomendacionGeneradaBase):
+    """Schema de respuesta de recomendación"""
+
+    id: UUID
+    fue_clickeado: bool
+    fue_agregado_carrito: bool
+    fecha_creacion: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class ProductoRecomendado(BaseModel):
+    """Producto con su recomendación IA"""
+
+    id: UUID
+    nombre: str
+    descripcion: Optional[str]
+    precio_regular: Decimal
+    precio_descuento: Optional[Decimal]
+    categoria: str
+    imagen_principal: Optional[str]
+    razon: str  # Explicación de IA
+    palabras_clave: List[str] = []
+    score: Optional[int] = None
+
+
+class AnalisisCompletoResponse(BaseModel):
+    """Respuesta completa de análisis con recomendaciones"""
+
+    analisis_id: UUID
+    tipo_cuerpo: str
+    confianza: Optional[Decimal]
+    fecha_analisis: datetime
+    recomendaciones: List[ProductoRecomendado]
+    total_recomendaciones: int
+
+    class Config:
+        from_attributes = True
+
+
+class RegistrarInteraccionRequest(BaseModel):
+    """Schema para registrar interacción del usuario"""
+
+    recomendacion_id: UUID
+    tipo_interaccion: str = Field(
+        ...,
+        pattern="^(click|agregar_carrito|compra)$",
+        description="Tipo de interacción: click, agregar_carrito, compra",
+    )

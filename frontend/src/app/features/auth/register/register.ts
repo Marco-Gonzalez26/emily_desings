@@ -27,14 +27,15 @@ export class RegisterComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Crear formulario con validaciones
+
     this.registerForm = this.fb.group({
       nombre_completo: ['', [Validators.required]],
+      cedula_ruc: ['', [Validators.required, Validators.pattern(/^[0-9]{10,13}$/)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       telefono: [''],
       direccion: [''],
-      rol: ['cliente'], // Por defecto cliente
+      rol: ['cliente'],
     });
   }
 
@@ -42,7 +43,6 @@ export class RegisterComponent implements OnInit {
    * Submit del formulario de registro
    */
   onSubmit(): void {
-    // Marcar todos los campos como touched para mostrar errores
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
       return;
@@ -57,17 +57,21 @@ export class RegisterComponent implements OnInit {
       next: (response) => {
         console.log('Registro exitoso:', response);
         this.isLoading = false;
-
-        // Redirigir a productos
-        this.router.navigate(['/productos']);
+        this.router.navigate(['/catalogo']);
       },
       error: (error) => {
         console.error('Error en registro:', error);
         this.isLoading = false;
 
-        // Mostrar mensaje de error
         if (error.status === 400) {
-          this.errorMessage = 'El email ya está registrado';
+          // Manejar errores específicos
+          if (error.error.detail === 'El email ya está registrado') {
+            this.errorMessage = 'El email ya está registrado';
+          } else if (error.error.detail === 'Cédula o RUC inválido') {
+            this.errorMessage = 'La cédula o RUC ingresado no es válido';
+          } else {
+            this.errorMessage = error.error.detail || 'Error al crear la cuenta';
+          }
         } else {
           this.errorMessage = 'Error al crear la cuenta. Intenta nuevamente.';
         }
@@ -87,6 +91,10 @@ export class RegisterComponent implements OnInit {
    */
   get nombre_completo() {
     return this.registerForm.get('nombre_completo');
+  }
+
+  get cedula_ruc() {
+    return this.registerForm.get('cedula_ruc');
   }
 
   get email() {
