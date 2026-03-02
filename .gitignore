@@ -87,3 +87,5 @@ backend/dataset_cropped/
 backend/dataset_processed/
 backend/dataset_raw/
 backend/dataset_segmented/
+
+backend/app/ai_models/*.pt
