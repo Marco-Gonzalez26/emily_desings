@@ -323,8 +323,43 @@ class OrdenResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     items: List[OrdenItemResponse] = []
-
+    usuario: Optional[UsuarioBase] = None
     model_config = ConfigDict(from_attributes=True)
+
+
+class OrdenEstadoUpdate(BaseModel):
+    """Schema para actualizar estado de orden (ADMIN)"""
+
+    estado: str = Field(
+        ...,
+        description="Nuevo estado: Pendiente, Confirmado, En Proceso, Enviado, Entregado, Cancelado",
+    )
+    motivo_cancelacion: Optional[str] = Field(
+        None, description="Motivo de cancelación (requerido si estado=Cancelado)"
+    )
+
+
+class OrdenFilters(BaseModel):
+    """Filtros para búsqueda de órdenes (ADMIN)"""
+
+    skip: int = Field(default=0, ge=0, description="Registros a saltar")
+    limit: int = Field(default=50, ge=1, le=100, description="Límite de registros")
+    estado: Optional[str] = Field(None, description="Filtrar por estado")
+    fecha_desde: Optional[datetime] = Field(None, description="Filtrar desde fecha")
+    fecha_hasta: Optional[datetime] = Field(None, description="Filtrar hasta fecha")
+    search: Optional[str] = Field(
+        None, description="Buscar por número de orden o email"
+    )
+
+
+class EstadisticasOrdenesResponse(BaseModel):
+    """Estadísticas de órdenes (ADMIN)"""
+
+    total_ordenes: int
+    ordenes_por_estado: dict
+    ventas_totales: float
+    ordenes_mes: int
+    ventas_mes: float
 
 
 class StripeCheckoutRequest(BaseModel):

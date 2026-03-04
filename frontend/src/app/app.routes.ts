@@ -28,6 +28,8 @@ import { AdminProductsListComponent } from './features/admin/products/admin-prod
 import { AdminProductFormComponent } from './features/admin/products/admin-product-form/admin-product-form.component';
 import { AdminInventoryListComponent } from './features/admin/inventories/admin-inventories-list/admin-inventories-list.component';
 import { AdminProductInventoryComponent } from './features/admin/inventories/admin-product-inventory/admin-product-inventory.component';
+import { AdminOrdersListComponent } from './features/admin/orders/admin-orders-list/admin-orders-list.component';
+import { AdminOrderDetailComponent } from './features/admin/orders/admin-order-detail/admin-order-detail.component';
 
 export const routes: Routes = [
   {
@@ -132,6 +134,13 @@ export const routes: Routes = [
             path: 'producto/:id',
             component: AdminProductInventoryComponent,
           },
+        ],
+      },
+      {
+        path: 'ordenes',
+        children: [
+          { path: '', component: AdminOrdersListComponent },
+          { path: ':id', component: AdminOrderDetailComponent },
         ],
       },
     ],

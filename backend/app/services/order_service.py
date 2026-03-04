@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session, joinedload
 from fastapi import HTTPException, status
 from uuid import uuid4, UUID
 from decimal import Decimal
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 import stripe
 import os
@@ -301,3 +301,219 @@ def confirmar_pago_stripe(db: Session, session_id: str, user: Usuario) -> Orden:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Error al confirmar pago: {str(e)}",
         )
+
+
+def get_all_ordenes_admin(
+    db: Session,
+    skip: int = 0,
+    limit: int = 50,
+    estado: Optional[str] = None,
+    fecha_desde: Optional[datetime] = None,
+    fecha_hasta: Optional[datetime] = None,
+    search: Optional[str] = None,
+) -> tuple[List[Orden], int]:
+    """
+    Obtener todas las órdenes con filtros (SOLO ADMIN)
+
+    Args:
+        db: Sesión de base de datos
+        skip: Registros a saltar (paginación)
+        limit: Límite de registros
+        estado: Filtrar por estado específico
+        fecha_desde: Filtrar desde fecha
+        fecha_hasta: Filtrar hasta fecha
+        search: Buscar por número de orden o email de usuario
+
+    Returns:
+        tuple: (ordenes, total)
+    """
+    query = db.query(Orden).options(joinedload(Orden.usuario), joinedload(Orden.items))
+
+    if estado:
+        query = query.filter(Orden.estado == estado)
+
+    # Filtro por fecha
+    if fecha_desde:
+        query = query.filter(Orden.fecha_orden >= fecha_desde)
+
+    if fecha_hasta:
+        query = query.filter(Orden.fecha_orden <= fecha_hasta)
+
+    # Búsqueda por número de orden o email
+    if search:
+        query = query.join(Usuario).filter(
+            (Orden.numero_orden.ilike(f"%{search}%"))
+            | (Usuario.email.ilike(f"%{search}%"))
+            | (Usuario.nombre.ilike(f"%{search}%"))
+        )
+
+    total = query.count()
+    ordenes = query.order_by(Orden.fecha_orden.desc()).offset(skip).limit(limit).all()
+
+    return ordenes, total
+
+
+def get_orden_by_id_admin(db: Session, orden_id: UUID) -> Orden:
+    """
+    Obtener orden por ID (SOLO ADMIN)
+
+    Args:
+        db: Sesión de base de datos
+        orden_id: UUID de la orden
+
+    Returns:
+        Orden completa con relaciones
+
+    Raises:
+        HTTPException: Si la orden no existe
+    """
+    orden = (
+        db.query(Orden)
+        .options(
+            joinedload(Orden.usuario),
+            joinedload(Orden.items).joinedload(OrdenItem.producto),
+            joinedload(Orden.items).joinedload(OrdenItem.talla),
+            joinedload(Orden.items).joinedload(OrdenItem.color),
+        )
+        .filter(Orden.id == orden_id)
+        .first()
+    )
+
+    if not orden:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Orden no encontrada"
+        )
+
+    return orden
+
+
+def update_orden_estado(
+    db: Session,
+    orden_id: UUID,
+    nuevo_estado: str,
+    motivo_cancelacion: Optional[str] = None,
+) -> Orden:
+    """
+    Actualizar el estado de una orden (SOLO ADMIN)
+
+    Args:
+        db: Sesión de base de datos
+        orden_id: UUID de la orden
+        nuevo_estado: Nuevo estado a aplicar
+        motivo_cancelacion: Razón de cancelación (solo si estado = Cancelado)
+
+    Returns:
+        Orden actualizada
+
+    Raises:
+        HTTPException: Si la orden no existe o el estado es inválido
+    """
+    orden = get_orden_by_id_admin(db, orden_id)
+
+    # Validar estado
+    estados_validos = [
+        "Pendiente",
+        "Confirmado",
+        "En Proceso",
+        "Enviado",
+        "Entregado",
+        "Cancelado",
+    ]
+    if nuevo_estado not in estados_validos:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Estado inválido. Debe ser uno de: {', '.join(estados_validos)}",
+        )
+
+    # Validar transiciones de estado
+    if orden.estado == "Entregado":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No se puede cambiar el estado de una orden ya entregada",
+        )
+
+    if orden.estado == "Cancelado" and nuevo_estado != "Cancelado":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No se puede cambiar el estado de una orden cancelada",
+        )
+
+    # Si se cancela, restaurar stock
+    if nuevo_estado == "Cancelado" and orden.estado != "Cancelado":
+        if not motivo_cancelacion:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Debe proporcionar un motivo de cancelación",
+            )
+
+        # Restaurar stock
+        for item in orden.items:
+            inventario = (
+                db.query(Inventario)
+                .filter(
+                    Inventario.producto_id == item.producto_id,
+                    Inventario.talla_id == item.talla_id,
+                    Inventario.color_id == item.color_id,
+                )
+                .first()
+            )
+
+            if inventario:
+                inventario.stock += item.cantidad
+
+        orden.motivo_cancelacion = motivo_cancelacion
+
+    # Actualizar estado
+    orden.estado = nuevo_estado
+    orden.fecha_actualizacion_estado = datetime.now()
+
+    db.commit()
+    db.refresh(orden)
+
+    return orden
+
+
+def get_estadisticas_ordenes(db: Session) -> dict:
+    """
+    Obtener estadísticas de órdenes (SOLO ADMIN)
+
+    Returns:
+        dict con estadísticas clave
+    """
+    from sqlalchemy import func
+
+    total_ordenes = db.query(func.count(Orden.id)).scalar()
+
+    # Órdenes por estado
+    ordenes_por_estado = (
+        db.query(Orden.estado, func.count(Orden.id)).group_by(Orden.estado).all()
+    )
+
+    # Ventas totales
+    ventas_totales = db.query(func.sum(Orden.total)).filter(
+        Orden.estado.in_(["Confirmado", "En Proceso", "Enviado", "Entregado"])
+    ).scalar() or Decimal("0.00")
+
+    # Órdenes del mes actual
+    from datetime import date
+
+    primer_dia_mes = date.today().replace(day=1)
+
+    ordenes_mes = (
+        db.query(func.count(Orden.id))
+        .filter(Orden.fecha_orden >= primer_dia_mes)
+        .scalar()
+    )
+
+    ventas_mes = db.query(func.sum(Orden.total)).filter(
+        Orden.fecha_orden >= primer_dia_mes,
+        Orden.estado.in_(["Confirmado", "En Proceso", "Enviado", "Entregado"]),
+    ).scalar() or Decimal("0.00")
+
+    return {
+        "total_ordenes": total_ordenes,
+        "ordenes_por_estado": {estado: count for estado, count in ordenes_por_estado},
+        "ventas_totales": float(ventas_totales),
+        "ordenes_mes": ordenes_mes,
+        "ventas_mes": float(ventas_mes),
+    }
