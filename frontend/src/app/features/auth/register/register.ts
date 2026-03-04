@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { jamEye, jamEyeClose } from '@ng-icons/jam-icons';
-import { AuthService } from '../../../core/services/auth';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -27,7 +27,6 @@ export class RegisterComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-
     this.registerForm = this.fb.group({
       nombre_completo: ['', [Validators.required]],
       cedula_ruc: ['', [Validators.required, Validators.pattern(/^[0-9]{10,13}$/)]],

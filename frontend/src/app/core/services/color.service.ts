@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Color, ColorCreate, ColorUpdate } from '../../shared/models/color';
 import { Observable } from 'rxjs';
-import { ApiService } from './api';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root',

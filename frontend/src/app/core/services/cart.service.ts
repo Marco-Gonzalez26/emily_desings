@@ -1,6 +1,6 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { Observable, tap } from 'rxjs';
-import { ApiService } from './api';
+import { ApiService } from './api.service';
 import {
   Cart,
   CartItem,

@@ -15,6 +15,9 @@ from sqlalchemy.dialects.postgresql import UUID, JSONB, ARRAY
 from sqlalchemy.orm import relationship, declarative_base
 from datetime import datetime
 
+from typing import Optional
+
+from pydantic import Field, validator
 
 
 Base = declarative_base()
@@ -41,7 +44,6 @@ class Usuario(Base):
     created_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
     updated_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
 
-
     __table_args__ = (
         CheckConstraint(
             "rol IN ('cliente', 'administrador')", name="usuarios_rol_check"
@@ -55,13 +57,6 @@ class Usuario(Base):
     tokens_recuperacion = relationship(
         "TokenRecuperacion", back_populates="usuario", cascade="all, delete-orphan"
     )
-    perfil_morfologico = relationship(
-        "PerfilMorfologico",
-        back_populates="usuario",
-        uselist=False,
-        cascade="all, delete-orphan",
-    )
-    
     preferencias = relationship(
         "PreferenciasUsuario",
         back_populates="usuario",
@@ -135,34 +130,34 @@ class TokenRecuperacion(Base):
     usuario = relationship("Usuario", back_populates="tokens_recuperacion")
 
 
-class PerfilMorfologico(Base):
-    """Perfil morfológico del usuario para recomendaciones personalizadas"""
+# class PerfilMorfologico(Base):
+#     """Perfil morfológico del usuario para recomendaciones personalizadas"""
 
-    __tablename__ = "perfil_morfologico"
+#     __tablename__ = "perfil_morfologico"
 
-    id = Column(
-        UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()")
-    )
-    usuario_id = Column(
-        UUID(as_uuid=True), ForeignKey("usuarios.id", ondelete="CASCADE"), unique=True
-    )
-    altura = Column(Numeric(5, 2))
-    peso = Column(Numeric(5, 2))
-    tipo_cuerpo = Column(String(50))
-    fecha_ultima_actualizacion = Column(
-        DateTime, server_default=text("CURRENT_TIMESTAMP")
-    )
-    created_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
-    updated_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
+#     id = Column(
+#         UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()")
+#     )
+#     usuario_id = Column(
+#         UUID(as_uuid=True), ForeignKey("usuarios.id", ondelete="CASCADE"), unique=True
+#     )
+#     altura = Column(Numeric(5, 2))
+#     peso = Column(Numeric(5, 2))
+#     tipo_cuerpo = Column(String(50))
+#     fecha_ultima_actualizacion = Column(
+#         DateTime, server_default=text("CURRENT_TIMESTAMP")
+#     )
+#     created_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
+#     updated_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
 
-    __table_args__ = (
-        CheckConstraint(
-            "tipo_cuerpo IN ('Triangulo', 'Triangulo Invertido', 'Rectangulo', 'Reloj de Arena', 'Ovalo')",
-            name="perfil_morfologico_tipo_cuerpo_check",
-        ),
-    )
+#     __table_args__ = (
+#         CheckConstraint(
+#             "tipo_cuerpo IN ('Triangulo', 'Triangulo Invertido', 'Rectangulo', 'Reloj de Arena', 'Ovalo')",
+#             name="perfil_morfologico_tipo_cuerpo_check",
+#         ),
+#     )
 
-    usuario = relationship("Usuario", back_populates="perfil_morfologico")
+#     usuario = relationship("Usuario", back_populates="perfil_morfologico")
 
 
 # class PreferenciaEstilo(Base):
@@ -431,6 +426,8 @@ class ImagenProducto(Base):
     created_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
 
     producto = relationship("Producto", back_populates="imagenes")
+
+
 
 
 class ProductoEtiquetaMorfologica(Base):

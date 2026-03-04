@@ -20,8 +20,7 @@ class BodySegmentation:
         self.model = self._load_deeplab()
         self.model_path = self._download_medidapipe_model()
 
-        base_options = python.BaseOptions(
-            model_asset_path=str(self.model_path))
+        base_options = python.BaseOptions(model_asset_path=str(self.model_path))
         options = vision.PoseLandmarkerOptions(
             base_options=base_options,
             output_segmentation_masks=False,
@@ -31,11 +30,14 @@ class BodySegmentation:
         )
         self.pose_detector = vision.PoseLandmarker.create_from_options(options)
 
-        self.preprocess = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                 std=[0.229, 0.224, 0.225])
-        ])
+        self.preprocess = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                ),
+            ]
+        )
 
     def _download_medidapipe_model(self):
         """
@@ -47,6 +49,7 @@ class BodySegmentation:
 
         if not model_path.exists():
             import urllib.request
+
             print("Descargando modelo MediaPipe…")
             url = "https://storage.googleapis.com/mediapipe-assets/pose_landmarker/pose_landmarker_heavy.task"
             urllib.request.urlretrieve(url, str(model_path))
@@ -59,9 +62,9 @@ class BodySegmentation:
         Carga el modelo DeepLabV3 ResNet50 pre-entrenado.
         """
         print(f"Cargando modelo DeepLabV3 ResNet50 en {self.device}")
-        model = deeplabv3_resnet50(weights="DEFAULT")  # pretrained
+        model = deeplabv3_resnet50(weights="DEFAULT")
         model.eval()
-        model.to(self.device)  # si tienes GPU puedes usar "cuda"
+        model.to(self.device)
         print("Modelo cargado.")
         return model
 
@@ -76,11 +79,8 @@ class BodySegmentation:
         inp = self.preprocess(pil_img).unsqueeze(0).to(self.device)
 
         with torch.no_grad():
-            out = self.model(inp)["out"][0]        # (21 clases)
+            out = self.model(inp)["out"][0]
             mask = out.argmax(0).cpu().numpy()
-
-        # Clase persona en PASCAL VOC = 15
-        person = (mask == 15).astype(np.uint8) * 255
 
         # Limpieza de mascara
         kernel = np.ones((5, 5), np.uint8)
@@ -106,12 +106,12 @@ class BodySegmentation:
         keypoints = {}
 
         KEY_INDICES = {
-            'left_shoulder': 11,
-            'right_shoulder': 12,
-            'left_elbow': 13,
-            'right_elbow': 14,
-            'left_hip': 23,
-            'right_hip': 24,
+            "left_shoulder": 11,
+            "right_shoulder": 12,
+            "left_elbow": 13,
+            "right_elbow": 14,
+            "left_hip": 23,
+            "right_hip": 24,
         }
 
         for name, index in KEY_INDICES.items():
@@ -134,23 +134,20 @@ class BodySegmentation:
 
         # Ancho de los hombros
         shoulder_width = abs(
-            keypoints['left_shoulder']['x'] - keypoints['right_shoulder']['x']
+            keypoints["left_shoulder"]["x"] - keypoints["right_shoulder"]["x"]
         )
 
         # Ancho de caderas
-        hip_width = abs(
-            keypoints["left_hip"]["x"] -
-            keypoints["right_hip"]["x"]
-        )
+        hip_width = abs(keypoints["left_hip"]["x"] - keypoints["right_hip"]["x"])
 
         if hip_width == 0:
             return None
 
         ratios = {
-            'shoulder_width': shoulder_width,
-            'hip_width': hip_width,
-            'shoulder_hip_ratio': shoulder_width / hip_width,
-            'hip_shoulder_ratio': hip_width / shoulder_width,
+            "shoulder_width": shoulder_width,
+            "hip_width": hip_width,
+            "shoulder_hip_ratio": shoulder_width / hip_width,
+            "hip_shoulder_ratio": hip_width / shoulder_width,
         }
 
         return ratios
@@ -177,8 +174,14 @@ class BodySegmentation:
 
         return img[y1:y2, x1:x2]
 
-    def process_single_image(self, input_path, output_dir, save_mask=True,
-                             save_crop=True, save_keypoints=True):
+    def process_single_image(
+        self,
+        input_path,
+        output_dir,
+        save_mask=True,
+        save_crop=True,
+        save_keypoints=True,
+    ):
         """
         Procesa una imagen completa: segmentación + keypoints + features
         """
@@ -193,13 +196,13 @@ class BodySegmentation:
 
         # 1. Segmentación
         mask = self.segment_person(img)
-        results['mask'] = mask
+        results["mask"] = mask
 
         if save_mask:
             mask_path = Path(output_dir) / "masks" / f"{img_name}_mask.png"
             mask_path.parent.mkdir(parents=True, exist_ok=True)
             cv2.imwrite(str(mask_path), mask)
-            results['mask_path'] = str(mask_path)
+            results["mask_path"] = str(mask_path)
 
         # 2. Recorte
         if save_crop:
@@ -208,35 +211,34 @@ class BodySegmentation:
                 crop_path = Path(output_dir) / "cropped" / f"{img_name}.jpg"
                 crop_path.parent.mkdir(parents=True, exist_ok=True)
                 cv2.imwrite(str(crop_path), cropped)
-                results['crop_path'] = str(crop_path)
+                results["crop_path"] = str(crop_path)
 
         # 3. Keypoints
         keypoints = self.extract_keypoints(img)
-        results['keypoints'] = keypoints
+        results["keypoints"] = keypoints
 
         if save_keypoints and keypoints:
             # Dibujar keypoints en imagen
             img_with_kp = img.copy()
             for name, kp in keypoints.items():
                 cv2.circle(
-                    img_with_kp,
-                    (int(kp['x']), int(kp['y'])),
-                    5, (0, 255, 0), -1
+                    img_with_kp, (int(kp["x"]), int(kp["y"])), 5, (0, 255, 0), -1
                 )
 
             kp_path = Path(output_dir) / "keypoints" / f"{img_name}_kp.jpg"
             kp_path.parent.mkdir(parents=True, exist_ok=True)
             cv2.imwrite(str(kp_path), img_with_kp)
-            results['keypoints_path'] = str(kp_path)
+            results["keypoints_path"] = str(kp_path)
 
         # 4. Calcular ratios
         ratios = self.calculate_body_ratios(keypoints)
-        results['ratios'] = ratios
+        results["ratios"] = ratios
 
         return results
 
-    def process_dataset(self, input_folder="app/dataset_raw",
-                        output_folder="app/dataset_processed"):
+    def process_dataset(
+        self, input_folder="app/dataset_raw", output_folder="app/dataset_processed"
+    ):
         """
         Procesa todo el dataset organizado por categorías
         """
@@ -260,21 +262,17 @@ class BodySegmentation:
             print(f"\n📁 Procesando categoría: {category_name}")
 
             # Buscar imágenes
-            image_files = list(category_dir.glob("*.jpg")) + \
-                list(category_dir.glob("*.jpeg")) + \
-                list(category_dir.glob("*.png"))
+            image_files = (
+                list(category_dir.glob("*.jpg"))
+                + list(category_dir.glob("*.jpeg"))
+                + list(category_dir.glob("*.png"))
+            )
 
             if not image_files:
                 print(f"  ⚠️ No se encontraron imágenes en {category_name}")
                 continue
-
             print(f"  Encontradas {len(image_files)} imágenes")
-
-            # Crear carpeta de salida para esta categoría
-            category_output = output_path / category_name
-            category_output.mkdir(exist_ok=True)
-
-            # Procesar cada imagen
+            output_path / category_name.mkdir(exist_ok=True)
             for img_file in tqdm(image_files, desc=f"  {category_name}"):
                 try:
                     results = self.process_single_image(
@@ -282,7 +280,7 @@ class BodySegmentation:
                         category_output,
                         save_mask=True,
                         save_crop=True,
-                        save_keypoints=True
+                        save_keypoints=True,
                     )
 
                     if results:
@@ -315,6 +313,5 @@ if __name__ == "__main__":
 
     # Procesar dataset completo
     pipeline.process_dataset(
-        input_folder="app/dataset_raw",
-        output_folder="app/dataset_processed"
+        input_folder="app/dataset_raw", output_folder="app/dataset_processed"
     )

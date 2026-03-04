@@ -7,13 +7,15 @@ import { CartService } from '@services/cart.service';
 import { QuickAddModalComponent } from '../../shared/components/quick-add/quick-add.component';
 import { AnalisisMorfologico, ProductoRecomendado, TIPOS_CUERPO } from '@models/body_analysis';
 import { QuickAddData, QuickAddResult } from '@models/quick_add';
-
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { jamUpload } from '@ng-icons/jam-icons';
 type EstadoAnalisis = 'inicial' | 'cargando' | 'resultado' | 'error';
 
 @Component({
   selector: 'app-analisis-morfologico',
   standalone: true,
-  imports: [CommonModule, QuickAddModalComponent],
+  imports: [CommonModule, QuickAddModalComponent, NgIconComponent],
+  providers: [provideIcons({ jamUpload })],
   templateUrl: './morphology-analysis.component.html',
 })
 export class MorphologyAnalysisComponent {
@@ -21,7 +23,7 @@ export class MorphologyAnalysisComponent {
   private cartService = inject(CartService);
   private router = inject(Router);
 
-  // Signals de estado
+
   estado = signal<EstadoAnalisis>('inicial');
   imagenSeleccionada = signal<File | null>(null);
   imagenPreview = signal<string | null>(null);
@@ -360,6 +362,4 @@ export class MorphologyAnalysisComponent {
 
     return ((regularNum - descuentoNum) / regularNum) * 100;
   }
-
-
 }

@@ -21,7 +21,7 @@ import { Product } from '../../../shared/models/product';
 import { Inventario } from '../../../shared/models/inventory';
 import { CartService } from '../../../core/services/cart.service';
 import { InventarioService } from '../../../core/services/inventory.service';
-import { ProductoService } from '../../../core/services/product/product';
+import { ProductoService } from '../../../core/services/product.service';
 import { Talla } from '../../../shared/models/size';
 import { Color } from '../../../shared/models/color';
 
@@ -122,7 +122,7 @@ export class ProductDetailComponent implements OnInit {
   }
 
   loadInventario(productoId: string): void {
-    this.inventarioService.getInventarioByProducto(productoId).subscribe({
+    this.inventarioService.getInventarioProducto(productoId).subscribe({
       next: (inventario) => this.inventario.set(inventario),
       error: () => console.error('Error cargando inventario'),
     });
@@ -188,7 +188,7 @@ export class ProductDetailComponent implements OnInit {
   }
 
   getTallaDisplay(talla: Talla): string {
-    return talla.abreviatura || talla.nombre;
+    return talla.nombre;
   }
 
   decreaseQty(): void {

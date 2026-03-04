@@ -1,8 +1,5 @@
-<!-- src/app/features/analisis-morfologico/analisis-morfologico.component.html -->
-
 <div class="min-h-screen bg-emily-cream py-8 px-4 sm:px-6 lg:px-8">
   <div class="max-w-7xl mx-auto">
-    <!-- Header -->
     <div class="text-center mb-8">
       <h1 class="text-4xl font-serif font-bold text-emily-dark mb-3">Análisis de Tipo de Cuerpo</h1>
       <p class="text-base text-emily-taupe max-w-3xl mx-auto">
@@ -11,14 +8,12 @@
       </p>
     </div>
 
-    <!-- Body Types Section -->
     <div class="bg-emily-white rounded-lg shadow-sm p-8 mb-8">
       <h2 class="text-2xl font-serif font-semibold text-center text-emily-dark mb-8">
         Identifica tu Silueta
       </h2>
 
       <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-        <!-- Triángulo Invertido -->
         <div class="text-center">
           <div class="mb-3 flex justify-center">
             <svg class="w-20 h-32 text-emily-rose/40" viewBox="0 0 100 150" fill="currentColor">
@@ -29,7 +24,6 @@
           <p class="text-xs text-emily-taupe">Hombros más anchos que caderas</p>
         </div>
 
-        <!-- Rectángulo -->
         <div class="text-center">
           <div class="mb-3 flex justify-center">
             <svg class="w-20 h-32 text-emily-rose/40" viewBox="0 0 100 150" fill="currentColor">
@@ -40,7 +34,6 @@
           <p class="text-xs text-emily-taupe">Hombros y caderas alineados, cintura recta</p>
         </div>
 
-        <!-- Reloj de Arena -->
         <div class="text-center">
           <div class="mb-3 flex justify-center">
             <svg class="w-20 h-32 text-emily-rose/40" viewBox="0 0 100 150" fill="currentColor">
@@ -53,7 +46,6 @@
           <p class="text-xs text-emily-taupe">Hombros y caderas balanceados, cintura definida</p>
         </div>
 
-        <!-- Pera (Triángulo) -->
         <div class="text-center">
           <div class="mb-3 flex justify-center">
             <svg class="w-20 h-32 text-emily-rose/40" viewBox="0 0 100 150" fill="currentColor">
@@ -62,39 +54,19 @@
               />
             </svg>
           </div>
-          <h3 class="font-semibold text-sm text-emily-dark mb-1">Pera</h3>
+          <h3 class="font-semibold text-sm text-emily-dark mb-1">Triángulo</h3>
           <p class="text-xs text-emily-taupe">Caderas más anchas que hombros</p>
         </div>
       </div>
     </div>
 
-    <!-- Upload Section -->
     @if (estado() === 'inicial' || estado() === 'error') {
       <div class="bg-emily-white rounded-lg shadow-sm p-8 mb-8">
-        <!-- Upload Icon & Text -->
         <div class="text-center mb-6">
           <div
             class="inline-flex items-center justify-center w-24 h-24 bg-emily-cream rounded-full mb-4"
           >
-            <svg
-              class="w-12 h-12 text-emily-taupe"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-              />
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
+            <ng-icon name="jamUpload" size="48" class="text-emily-taupe"></ng-icon>
           </div>
           <h3 class="text-xl font-serif font-semibold text-emily-dark mb-2">Sube tu Foto</h3>
           <p class="text-sm text-emily-taupe mb-4">
@@ -103,7 +75,6 @@
           </p>
         </div>
 
-        <!-- Drag & Drop Zone -->
         <div
           class="relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-300 mb-6"
           [class.border-emily-rose]="isDragging()"
@@ -146,7 +117,6 @@
           />
         </div>
 
-        <!-- Browse Button -->
         <div class="text-center mb-6">
           <button
             type="button"
@@ -157,14 +127,12 @@
           </button>
         </div>
 
-        <!-- Error Message -->
         @if (tieneError()) {
           <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
             <p class="text-sm text-red-800 text-center">{{ mensajeError() }}</p>
           </div>
         }
 
-        <!-- Analyze Button -->
         @if (imagenSeleccionada()) {
           <div class="text-center">
             <button
@@ -178,11 +146,9 @@
       </div>
     }
 
-    <!-- Loading State -->
     @if (estaCargando()) {
       <div class="bg-emily-white rounded-lg shadow-sm p-12">
         <div class="text-center">
-          <!-- Hourglass Animation -->
           <div class="flex justify-center mb-6">
             <svg
               class="w-24 h-24 text-emily-rose animate-pulse"
@@ -202,7 +168,6 @@
             Estamos procesando tu foto con inteligencia artificial...
           </p>
 
-          <!-- Progress Bar -->
           <div class="max-w-md mx-auto">
             <div class="w-full bg-emily-light rounded-full h-2">
               <div
@@ -216,10 +181,8 @@
       </div>
     }
 
-    <!-- Results Section -->
     @if (tieneResultado() && resultado()) {
       <div id="resultados" class="space-y-8">
-        <!-- Result Card -->
         <div class="bg-emily-white rounded-lg shadow-sm p-8">
           <div class="flex items-start justify-between mb-6">
             <div>
@@ -244,7 +207,6 @@
             </button>
           </div>
 
-          <!-- Confidence -->
           <div class="bg-emily-cream rounded-lg p-4 mb-6">
             <div class="flex items-center justify-between">
               <span class="text-sm text-emily-dark">Nivel de confianza:</span>
@@ -263,7 +225,6 @@
           </div>
         </div>
 
-        <!-- Recommendations Header -->
         <div class="bg-emily-white rounded-lg shadow-sm p-6">
           <div class="flex items-center justify-between">
             <h3 class="text-xl font-serif font-semibold text-emily-dark">
@@ -279,14 +240,12 @@
           </div>
         </div>
 
-        <!-- Products Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           @for (producto of resultado()!.recomendaciones; track producto.id) {
             <div
               (click)="verProducto(producto)"
               class="bg-emily-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden group"
             >
-              <!-- Image -->
               <div class="relative h-64 bg-emily-light overflow-hidden">
                 @if (producto.imagen_principal) {
                   <img
@@ -312,7 +271,6 @@
                   </div>
                 }
 
-                <!-- Wishlist Button -->
                 <button
                   class="absolute top-3 right-3 p-2 bg-emily-white rounded-full shadow-sm hover:bg-emily-light transition-colors"
                   (click)="$event.stopPropagation()"
@@ -332,7 +290,6 @@
                   </svg>
                 </button>
 
-                <!-- Discount Badge -->
                 @if (producto.precio_descuento) {
                   <div
                     class="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
@@ -342,9 +299,7 @@
                 }
               </div>
 
-              <!-- Content -->
               <div class="p-4">
-                <!-- Category & Brand -->
                 <div class="flex items-center justify-between text-xs text-emily-taupe mb-2">
                   <span>{{ producto.categoria }}</span>
                   @if (producto.marca) {
@@ -352,17 +307,14 @@
                   }
                 </div>
 
-                <!-- Title -->
                 <h4 class="text-sm font-medium text-emily-dark mb-2 line-clamp-2 h-10">
                   {{ producto.nombre }}
                 </h4>
 
-                <!-- AI Reason (Compact) -->
                 <p class="text-xs text-emily-taupe mb-3 line-clamp-2 italic">
                   "{{ producto.razon }}"
                 </p>
 
-                <!-- Price & Add to Cart -->
                 <div class="flex items-center justify-between pt-3 border-t border-emily-light">
                   <div>
                     @if (producto.precio_descuento) {

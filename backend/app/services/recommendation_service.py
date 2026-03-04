@@ -24,7 +24,7 @@ def generar_recomendaciones_inteligentes(
         Lista de productos recomendados con información completa
     """
 
-    # 1. Obtener categorías recomendadas para este tipo de cuerpo
+    # Obtener categorías recomendadas para este tipo de cuerpo
     reglas = (
         db.query(ReglasRecomendacion)
         .filter(
@@ -40,13 +40,13 @@ def generar_recomendaciones_inteligentes(
         print(f"No hay reglas para tipo de cuerpo: {tipo_cuerpo}")
         return []
 
-    # 2. Obtener historial del usuario (productos ya recomendados)
+    # Obtener historial del usuario
     productos_ya_vistos = _obtener_productos_ya_vistos(db, usuario_id)
 
     productos_finales = []
 
     for regla in reglas:
-        # 3. Query de productos de esta categoría
+        # Productos de esta categoría
         query = (
             db.query(Producto)
             .join(Categoria)
@@ -56,13 +56,13 @@ def generar_recomendaciones_inteligentes(
             )
         )
 
-        # 4. EXCLUIR productos ya vistos
+        # Excluir productos ya vistos
         if productos_ya_vistos:
             query = query.filter(~Producto.id.in_(productos_ya_vistos))
 
         productos = query.all()
 
-        # 5. Aplicar scoring inteligente
+        # Aplicar scoring
         productos_scored = []
         for p in productos:
             score = _calcular_score_producto(p, regla)
@@ -78,10 +78,8 @@ def generar_recomendaciones_inteligentes(
         if len(productos_finales) >= limite:
             break
 
-    # 6. Shuffle final para variedad
+    # Shuffle para variedad
     random.shuffle(productos_finales)
-
-    # 7. Convertir a diccionarios con información completa
     return [_producto_a_dict(p) for p in productos_finales[:limite]]
 
 
@@ -110,35 +108,21 @@ def _calcular_score_producto(producto: Producto, regla: ReglasRecomendacion) -> 
     Mayor score = mejor match
     """
     score = 0
-
-    # Factor 1: Prioridad de la regla (más importante)
-    score += (4 - regla.prioridad) * 30  # Prioridad 1 = +90, Prioridad 3 = +30
-
-    # Factor 2: Popularidad (productos destacados)
+    score += (4 - regla.prioridad) * 30
     if producto.es_destacado:
         score += 25
-
-    # Factor 3: Novedad (productos nuevos)
     if producto.es_nuevo:
         score += 20
-
-    # Factor 4: Tiene stock disponible
     stock_total = sum(inv.stock for inv in producto.inventarios)
     if stock_total > 0:
         score += 15
         if stock_total > 10:
-            score += 10  # Bonus por buen stock
-
-    # Factor 5: Precio (preferir rango medio accesible)
+            score += 10
     precio = float(producto.precio_descuento or producto.precio_regular)
-    if 30 <= precio <= 80:  # Rango accesible
+    if 30 <= precio <= 80:
         score += 10
-
-    # Factor 6: Tiene descuento (ofertas)
     if producto.es_oferta and producto.precio_descuento:
         score += 15
-
-    # Factor 7: Aleatoriedad (para variedad)
     score += random.randint(0, 20)
 
     return score

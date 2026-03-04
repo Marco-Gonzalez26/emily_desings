@@ -89,3 +89,4 @@ backend/dataset_raw/
 backend/dataset_segmented/
 
 backend/app/ai_models/*.pt
+backend/*.pt

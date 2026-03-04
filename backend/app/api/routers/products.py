@@ -147,7 +147,7 @@ def crear_producto(
     current_admin: Usuario = Depends(get_current_admin_user),
 ):
     """
-    Crear un nuevo producto (requiere permisos de administrador)
+    Crear un nuevo producto 
 
     - **sku**: Código único del producto
     - **nombre**: Nombre del producto
@@ -283,7 +283,7 @@ def obtener_variantes_producto(producto_id: UUID, db: Session = Depends(get_db))
                     "codigo_hex": getattr(inv.color, "codigo_hex", None),
                 }
 
-    # Imagen principal (ya está en ProductoDetailResponse, reusar lógica)
+
     imagen_principal = None
     if producto.imagenes:
         img_principal = next(
@@ -307,3 +307,5 @@ def obtener_variantes_producto(producto_id: UUID, db: Session = Depends(get_db))
         ),
         "colores_disponibles": list(colores_map.values()),
     }
+    
+

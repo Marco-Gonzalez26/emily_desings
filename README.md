@@ -3,20 +3,20 @@
 Sistema de recomendación inteligente para tienda de moda online con análisis
 morfológico mediante inteligencia artificial.
 
-## 📋 Descripción
+## Descripción
 
 Emily Designs es una plataforma de e-commerce desarrollada para mejorar la
 experiencia de compra de ropa online. El sistema utiliza inteligencia artificial
 para analizar la morfología corporal de los usuarios y recomendar prendas que
 mejor se adapten a sus características físicas y preferencias personales.
 
-## 👥 Autores
+##  Autores
 
 - **Doris López** - Diseñadora e Investigadora
 - **Emily Chiribora** - Diseñadora e Investigadora
 - **Marco González** - Desarrollador
 
-## 🛠️ Tecnologías
+## Tecnologías
 
 ### Frontend
 
@@ -43,17 +43,17 @@ mejor se adapten a sus características físicas y preferencias personales.
 - **Pasarela de Pagos**: Stripe
 - **Autenticación**: JWT
 
-## ✨ Características Principales
+## Características Principales
 
-- 🔍 Análisis morfológico mediante IA
-- 👗 Recomendación personalizada de prendas
-- 🛒 Carrito de compras completo
-- 💳 Sistema de pagos integrado
-- 📱 Diseño responsive
-- 👤 Gestión de perfiles de usuario
-- 📊 Panel de administración
+- Análisis morfológico mediante IA
+- Recomendación personalizada de prendas
+- Carrito de compras completo
+- Sistema de pagos integrado
+- Diseño responsive
+- Gestión de perfiles de usuario
+- Panel de administración
 
-## 🚀 Instalación
+## Instalación
 
 ### Prerrequisitos
 
@@ -92,5 +92,5 @@ emily-designs/
 - [x] Crear la página de inicio
 
 - [x] Implementar autenticación con JWT
-- [ ] Utiliza NG-ICONS para los iconos de la aplicación
-- [ ] Moficar la página de análisis morfológico para utilizar el Backend
+- [x] Utiliza NG-ICONS para los iconos de la aplicación
+- [x] Moficar la página de análisis morfológico para utilizar el Backend

@@ -6,7 +6,7 @@ import { jamBox, jamCalendar, jamCheck } from '@ng-icons/jam-icons';
 import { Orden, OrdenItem } from '../../shared/models/order';
 import { OrdenService } from '../../core/services/order.service';
 import { Product } from '../../shared/models/product';
-import { ProductoService } from '../../core/services/product/product';
+import { ProductoService } from '../../core/services/product.service';
 
 @Component({
   selector: 'app-orders',
@@ -60,7 +60,4 @@ export class OrdersComponent implements OnInit {
       year: 'numeric',
     });
   }
-
-
-
 }

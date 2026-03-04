@@ -1,57 +1,44 @@
+
 <div class="space-y-6">
-  <div>
-    <h1 class="text-3xl font-serif font-bold text-emily-dark">Dashboard</h1>
-    <p class="text-emily-taupe mt-1">Resumen general de Emily Designs</p>
+
+  <div class="bg-emily-white rounded-xl shadow-sm border border-emily-cream">
+  
+    <div class="p-6 border-b border-emily-cream">
+      <h1 class="text-3xl font-serif font-bold text-emily-dark">Dashboard</h1>
+      <p class="text-emily-taupe mt-1">Análisis y métricas de Emily Designs</p>
+    </div>
+
+
+    <div class="flex overflow-x-auto">
+      @for (tab of tabs; track tab.id) {
+        <button
+          (click)="selectTab(tab.id)"
+          [class.bg-emily-rose]="isTabActive()(tab.id)"
+          [class.text-emily-white]="isTabActive()(tab.id)"
+          [class.text-emily-dark]="!isTabActive()(tab.id)"
+          [class.hover:bg-emily-light]="!isTabActive()(tab.id)"
+          class="flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap border-b-2"
+          [class.border-emily-rose]="isTabActive()(tab.id)"
+          [class.border-transparent]="!isTabActive()(tab.id)"
+        >
+          <ng-icon [name]="tab.icon" size="20"></ng-icon>
+          <span>{{ tab.label }}</span>
+        </button>
+      }
+    </div>
   </div>
 
-  <!-- KPIs Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    @for (kpi of kpis; track kpi.label) {
-      <div
-        class="bg-white rounded-xl p-6 shadow-sm border border-neutral-100 hover:shadow-md transition"
-      >
-        <div class="flex items-start justify-between">
-          <div>
-            <p class="text-sm text-emily-taupe font-medium">{{ kpi.label }}</p>
-            <p class="text-3xl font-bold text-emily-dark mt-2">{{ kpi.value }}</p>
-            @if (kpi.change) {
-              <p
-                [class]="'text-sm mt-2 ' + (kpi.isPositive ? 'text-green-600' : 'text-emily-rose')"
-              >
-                {{ kpi.change }}
-              </p>
-            }
-          </div>
-          <div [class]="'w-12 h-12 rounded-lg flex items-center justify-center ' + kpi.color">
-            <ng-icon [name]="kpi.icon" size="24" class="text-white"></ng-icon>
-          </div>
-        </div>
-      </div>
+  <div id="dashboard-content">
+    @if (activeTab() === 'general') {
+      <app-general-tab />
+    } @else if (activeTab() === 'productos') {
+      <app-products-tab />
+    } @else if (activeTab() === 'clientes') {
+      <app-clients-tab />
+    } @else if (activeTab() === 'ventas') {
+      <app-orders-tab />
+    } @else if (activeTab() === 'analisis') {
+      <app-analysis-tab />
     }
-  </div>
-
-  <!-- Charts Placeholder -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div class="bg-white rounded-xl p-6 shadow-sm border border-neutral-100">
-      <h3 class="text-lg font-semibold text-emily-dark mb-4">Ventas del Mes</h3>
-      <div class="h-64 flex items-center justify-center text-emily-taupe">
-        <p>Gráfico de ventas (próximamente)</p>
-      </div>
-    </div>
-
-    <div class="bg-white rounded-xl p-6 shadow-sm border border-neutral-100">
-      <h3 class="text-lg font-semibold text-emily-dark mb-4">Productos Más Vendidos</h3>
-      <div class="h-64 flex items-center justify-center text-emily-taupe">
-        <p>Top productos (próximamente)</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Recent Orders Placeholder -->
-  <div class="bg-white rounded-xl p-6 shadow-sm border border-neutral-100">
-    <h3 class="text-lg font-semibold text-emily-dark mb-4">Órdenes Recientes</h3>
-    <div class="text-center py-8 text-emily-taupe">
-      <p>Tabla de órdenes recientes (próximamente)</p>
-    </div>
   </div>
 </div>

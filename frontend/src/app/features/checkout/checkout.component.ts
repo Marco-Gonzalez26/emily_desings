@@ -8,7 +8,7 @@ import { MessageService } from 'primeng/api';
 import { CartService } from '../../core/services/cart.service';
 import { OrdenService } from '../../core/services/order.service';
 import { OrdenCreate, OrdenItem } from '../../shared/models/order';
-import { AuthService } from '../../core/services/auth';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-checkout',

@@ -1,0 +1,95 @@
+
+@if (isOpen) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fadeIn"
+    (click)="onBackdropClick($event)"
+  >
+    <div class="bg-emily-white rounded-xl shadow-2xl max-w-md w-full mx-4 animate-scaleIn">
+
+      <div class="p-6 border-b border-emily-cream">
+        <div class="flex items-center gap-3">
+          @if (type === 'danger') {
+            <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+              <svg
+                class="w-6 h-6 text-red-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+            </div>
+          } @else if (type === 'warning') {
+            <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
+              <svg
+                class="w-6 h-6 text-yellow-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+            </div>
+          } @else {
+            <div class="w-12 h-12 rounded-full bg-emily-light flex items-center justify-center">
+              <svg
+                class="w-6 h-6 text-emily-dark"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+          }
+
+          <h2 class="text-xl font-serif font-bold text-emily-dark">{{ title }}</h2>
+        </div>
+      </div>
+
+
+      <div class="p-6">
+        <p class="text-emily-taupe leading-relaxed">{{ message }}</p>
+      </div>
+
+
+      <div class="p-6 border-t border-emily-cream flex gap-3 justify-end">
+        <button
+          (click)="onCancel()"
+          class="px-4 py-2 rounded-lg border border-emily-cream text-emily-dark hover:bg-emily-light transition-colors flex items-center gap-2"
+        >
+          <ng-icon name="jamClose" size="18"></ng-icon>
+          <span>{{ cancelText }}</span>
+        </button>
+
+        <button
+          (click)="onConfirm()"
+          [class]="
+            type === 'danger'
+              ? 'bg-red-600 hover:bg-red-700'
+              : 'bg-emily-rose hover:bg-emily-rose/90'
+          "
+          class="px-4 py-2 rounded-lg text-emily-white transition-colors flex items-center gap-2 shadow-sm"
+        >
+          <ng-icon name="jamCheck" size="18"></ng-icon>
+          <span>{{ confirmText }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+}

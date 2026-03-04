@@ -7,7 +7,8 @@ import { CategoryService } from '../../../core/services/category.service';
 
 import { BrandService } from './../../../core/services/brand.service';
 
-import { Category, Brand } from './../../../shared/models/catalog';
+import { Brand } from './../../../shared/models/brand';
+import { Category } from '@app/shared/models/category';
 import { ProductFilters } from '../../../shared/models/product';
 
 @Component({
@@ -59,7 +60,7 @@ export class FiltersComponent implements OnInit {
   }
 
   loadMarcas(): void {
-    this.marcaService.getBrands().subscribe({
+    this.marcaService.getMarcas().subscribe({
       next: (data) => this.marcas.set(data),
       error: (err) => console.error('Error cargando marcas:', err),
     });

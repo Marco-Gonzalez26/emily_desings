@@ -11,7 +11,7 @@ import {
   jamChevronRight,
   jamShoppingBag,
 } from '@ng-icons/jam-icons';
-import { ProductoService } from '../../../core/services/product/product';
+import { ProductoService } from '../../../core/services/product.service';
 import { Product, ProductFilters } from '../../../shared/models/product';
 import { FiltersComponent } from '../filters/filters';
 import { ProductCardComponent } from '../../../shared/components/product-card/product-card';

@@ -12,13 +12,15 @@ from app.api.routers import (
     colors,
     inventory,
     analysis,
+    dashboard,
+    product_images,
 )
 
 from app.models import (
     Usuario,
     TokenSesion,
     TokenRecuperacion,
-    PerfilMorfologico,
+    # PerfilMorfologico,
     # PreferenciaEstilo,
     AnalisisMorfologico,
     ReglasRecomendacion,
@@ -46,7 +48,7 @@ from app.db.config import check_db_connection
 
 
 async def lifespan(app: FastAPI):
-    # Pre-cargar modelos
+    # Pre cargar modelos
     clasification_service.inicializar_modelos()
     yield
 
@@ -79,9 +81,8 @@ app.include_router(sizes.router)
 app.include_router(colors.router)
 app.include_router(inventory.router)
 app.include_router(analysis.router)
-# app.include_router(usuarios.router, prefix="/api/usuarios", tags=["usuarios"])
-# app.include_router(carritos.router, prefix="/api/carritos", tags=["carritos"])
-
+app.include_router(dashboard.router)
+app.include_router(product_images.router)
 
 @app.on_event("startup")
 async def startup():

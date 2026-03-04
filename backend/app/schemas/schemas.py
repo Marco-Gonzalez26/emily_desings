@@ -47,7 +47,7 @@ class UsuarioResponse(UsuarioBase):
 class ProductoBase(BaseModel):
     """Esquema base de producto"""
 
-    sku: str
+    sku: Optional[str] = None
     nombre: str
     descripcion: Optional[str] = None
     precio_regular: Decimal = Field(..., gt=0)
@@ -89,6 +89,22 @@ class ProductoUpdate(BaseModel):
     es_destacado: Optional[bool] = None
 
 
+class ImagenProductoCreate(BaseModel):
+    """Schema para crear una imagen de producto"""
+
+    url_imagen: str
+    es_principal: Optional[bool] = False
+    orden: Optional[int] = None
+
+
+class ImagenProductoUpdate(BaseModel):
+    """Schema para actualizar una imagen de producto"""
+
+    url_imagen: Optional[str] = None
+    es_principal: Optional[bool] = None
+    orden: Optional[int] = None
+
+
 class ImagenProductoResponse(BaseModel):
     """Respuesta de imagen de producto"""
 
@@ -117,7 +133,6 @@ class ProductoDetailResponse(ProductoResponse):
 
     administrador_id: Optional[UUID] = None
 
-    # TODO: Agregar más relaciones si se necesita
     # categoria: Optional[CategoriaResponse] = None
     # marca: Optional[MarcaResponse] = None
 
@@ -149,7 +164,7 @@ class ProductoFilter(BaseModel):
 
 class TallaBase(BaseModel):
     nombre: str
-    abreviatura: Optional[str] = None
+
     orden: int = 0
     activo: bool = True
 
@@ -160,7 +175,7 @@ class TallaCreate(TallaBase):
 
 class TallaUpdate(BaseModel):
     nombre: Optional[str] = None
-    abreviatura: Optional[str] = None
+
     orden: Optional[int] = None
     activo: Optional[bool] = None
 
@@ -379,6 +394,15 @@ class InventarioUpdate(BaseModel):
     stock_reservado: Optional[int] = Field(None, ge=0)
 
 
+class InventarioAjuste(BaseModel):
+    """Schema para ajustar stock (incrementar/decrementar)"""
+
+    ajuste: int = Field(
+        ..., description="Cantidad a ajustar (positivo=añadir, negativo=quitar)"
+    )
+    razon: Optional[str] = Field(None, max_length=255, description="Razón del ajuste")
+
+
 class InventarioResponse(InventarioBase):
     """Esquema de respuesta de inventario"""
 
@@ -511,7 +535,7 @@ class InventarioProductoResponse(BaseModel):
     stock_reservado: int
     talla: Optional[TallaResponse] = None
     color: Optional[ColorResponse] = None
-
+    producto: Optional[ProductoResponse] = None
     model_config = ConfigDict(from_attributes=True)
 
 

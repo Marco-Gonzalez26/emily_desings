@@ -23,6 +23,7 @@ export interface Product {
   updated_at: string;
   imagenes: ProductImage[];
   tiene_stock?: boolean;
+  administrador_id?: string;
 }
 
 export interface ProductListResponse {

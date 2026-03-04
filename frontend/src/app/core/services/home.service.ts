@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService } from './api';
+import { ApiService } from './api.service';
 import { HomeData } from '../../shared/models/home';
 
 @Injectable({

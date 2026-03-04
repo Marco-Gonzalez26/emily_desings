@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService } from './api';
+import { ApiService } from './api.service';
 import { AnalisisMorfologico } from '@models/body_analysis';
 import { QuickAddData } from '@models/quick_add';
 

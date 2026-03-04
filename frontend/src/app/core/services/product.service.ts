@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpParams } from '@angular/common/http';
-import { ApiService } from '../api';
+import { ApiService } from './api.service';
 import {
   Product,
   ProductCreate,
@@ -9,7 +9,7 @@ import {
   ProductFilters,
   ProductListResponse,
   ProductImage,
-} from '../../../shared/models/product';
+} from '@app/shared/models/product';
 
 @Injectable({
   providedIn: 'root',
@@ -65,5 +65,25 @@ export class ProductoService {
 
   getProductImage(id: string): Observable<ProductImage> {
     return this.api.get<ProductImage>(`/api/productos/${id}/imagenes`);
+  }
+
+  // Imagenes de los productos
+  addImage(
+    productoId: string,
+    imageData: { url_imagen: string; es_principal?: boolean; orden?: number },
+  ): Observable<any> {
+    return this.api.post(`/api/productos/${productoId}/imagenes`, imageData);
+  }
+
+  deleteImage(productoId: string, imageId: string): Observable<any> {
+    return this.api.delete(`/api/productos/${productoId}/imagenes/${imageId}`);
+  }
+
+  updateImageOrder(productoId: string, imageId: string, orden: number): Observable<any> {
+    return this.api.put(`/api/productos/${productoId}/imagenes/${imageId}`, { orden });
+  }
+
+  setMainImage(productoId: string, imageId: string): Observable<any> {
+    return this.api.put(`/api/productos/${productoId}/imagenes/${imageId}`, { es_principal: true });
   }
 }

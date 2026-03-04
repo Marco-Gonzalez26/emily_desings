@@ -3,7 +3,7 @@ from app.models.models import (
     Usuario,
     TokenSesion,
     TokenRecuperacion,
-    PerfilMorfologico,
+    # PerfilMorfologico,
     # PreferenciaEstilo,
     AnalisisMorfologico,
     ReglasRecomendacion,

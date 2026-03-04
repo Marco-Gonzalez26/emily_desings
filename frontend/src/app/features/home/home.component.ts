@@ -254,7 +254,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
           duration: 0.7,
           ease: 'elastic.out(1, 0.5)',
         },
-        '-=0.2',
+        '-=1',
       );
   }
 }

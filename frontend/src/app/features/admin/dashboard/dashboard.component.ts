@@ -1,53 +1,53 @@
-import { Component } from '@angular/core';
+import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { jamCreditCard, jamShoppingCart, jamBox, jamUsers } from '@ng-icons/jam-icons';
 
-interface KPI {
+import { GeneralTabComponent } from './genera-tab/general-tab.component';
+import { ProductsTabComponent } from './products-tab/products-tab.component';
+import { ClientsTabComponent } from './clients-tab/clients-tab.component';
+import { OrdersTabComponent } from './orders-tab/orders-tab.component';
+import { AnalysisTabComponent } from './analysis-tab/analysis-tab.component';
+import { NgIcon, NgIconComponent, provideIcons } from '@ng-icons/core';
+import { jamBox, jamCamera, jamCoin, jamDashboard, jamUsers } from '@ng-icons/jam-icons';
+
+type TabId = 'general' | 'productos' | 'clientes' | 'ventas' | 'analisis';
+
+interface Tab {
+  id: TabId;
   label: string;
-  value: string;
   icon: string;
-  color: string;
-  change?: string;
-  isPositive?: boolean;
 }
 
 @Component({
-  selector: 'app-admin-dashboard',
+  selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, NgIconComponent],
-  providers: [provideIcons({ jamCreditCard, jamShoppingCart, jamBox, jamUsers })],
+
+  imports: [
+    CommonModule,
+    GeneralTabComponent,
+    ProductsTabComponent,
+    ClientsTabComponent,
+    OrdersTabComponent,
+    AnalysisTabComponent,
+
+    NgIconComponent,
+  ],
+  providers: [provideIcons({ jamDashboard, jamBox, jamUsers, jamCoin, jamCamera })],
   templateUrl: './dashboard.component.html',
 })
 export class AdminDashboardComponent {
-  kpis: KPI[] = [
-    {
-      label: 'Ventas del Mes',
-      value: '$0.00',
-      icon: 'jamCreditCard',
-      color: 'bg-green-500',
-      change: '+0% vs mes anterior',
-      isPositive: true,
-    },
-    {
-      label: 'Órdenes',
-      value: '0',
-      icon: 'jamShoppingCart',
-      color: 'bg-emily-gold',
-      change: '+0 esta semana',
-      isPositive: true,
-    },
-    {
-      label: 'Productos',
-      value: '0',
-      icon: 'jamBox',
-      color: 'bg-emily-rose',
-    },
-    {
-      label: 'Usuarios',
-      value: '0',
-      icon: 'jamUsers',
-      color: 'bg-emily-taupe',
-    },
+  activeTab = signal<TabId>('general');
+
+  tabs: Tab[] = [
+    { id: 'general', label: 'General', icon: 'jamDashboard' },
+    { id: 'productos', label: 'Productos', icon: 'jamBox' },
+    { id: 'clientes', label: 'Clientes', icon: 'jamUsers' },
+    { id: 'ventas', label: 'Ventas', icon: 'jamCoin' },
+    { id: 'analisis', label: 'Análisis IA', icon: 'jamCamera' },
   ];
+
+  isTabActive = computed(() => (tabId: TabId) => this.activeTab() === tabId);
+
+  selectTab(tabId: TabId): void {
+    this.activeTab.set(tabId);
+  }
 }

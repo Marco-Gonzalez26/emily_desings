@@ -1,0 +1,39 @@
+Emily Designs - Sistema de E-commerce con IA
+
+Sistema de recomendación inteligente para tienda de moda online con análisis
+morfológico mediante inteligencia artificial.
+
+Autores
+
+- Doris López 
+- Emily Chiribora 
+- Marco González 
+
+Pasos para la instalación:
+
+Prerrequisitos
+
+- Node.js v18+
+- PostgreSQL 14+
+- Python 3.8+
+- npm 
+
+Backend
+
+
+1. Entrar en la carpeta del servidor: cd backend
+2. Correr le comando: venv\Scripts\Activate
+3. Instalar las dependencias: pip install -r requirements.txt
+4. Correr el comando: uvicorn main:app --reload
+
+
+Frontend
+
+
+1. Entrar en la carpeta del frontend: cd frontend
+2. Instalar las dependencias: npm install
+3. Correr el comando: ng serve -o
+
+Nota: revisar si la carpeta ai_models existe en backend/app si no existe, crear la carpeta y descargar el modelo de clasificación entrenado especialmente para este proyecto desde el siguiente enlace:
+ 
+  

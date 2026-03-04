@@ -1,9 +1,9 @@
-<div class="min-h-screen bg-neutral-50">
+<div class="min-h-screen bg-emily-cream">
   <div
-    class="lg:hidden bg-emily-dark text-emily-white p-4 flex items-center justify-between sticky top-0 z-50"
+    class="lg:hidden bg-emily-white border-b border-emily-cream text-emily-dark p-4 flex items-center justify-between sticky top-0 z-50 shadow-sm"
   >
     <h1 class="text-xl font-serif font-bold">EmilyDesigns</h1>
-    <button (click)="toggleSidebar()" class="p-2 hover:bg-emily-taupe/20 rounded-lg transition">
+    <button (click)="toggleSidebar()" class="p-2 hover:bg-emily-light rounded-lg transition">
       <ng-icon [name]="sidebarOpen() ? 'jamClose' : 'jamMenu'" size="24"></ng-icon>
     </button>
   </div>
@@ -11,38 +11,38 @@
   <div class="flex">
     <aside
       [class]="
-        'fixed lg:sticky top-0 h-screen bg-emily-dark text-emily-white w-64 transition-transform duration-300 z-40 ' +
+        'fixed lg:sticky top-0 h-screen bg-emily-white border-r border-emily-cream w-64 transition-transform duration-300 z-40 shadow-lg lg:shadow-none ' +
         (sidebarOpen() ? 'translate-x-0' : '-translate-x-full lg:translate-x-0')
       "
     >
-      <div class="hidden lg:flex items-center gap-3 p-6 border-b border-emily-taupe/20">
-        <div class="w-10 h-10 bg-emily-gold rounded-lg flex items-center justify-center">
-          <ng-icon name="jamDashboard" size="20"></ng-icon>
+      <div class="hidden lg:flex items-center gap-3 p-6 border-b border-emily-cream">
+        <div class="w-10 h-10 bg-emily-rose rounded-lg flex items-center justify-center shadow-sm">
+          <ng-icon name="jamDashboard" size="20" class="text-emily-white"></ng-icon>
         </div>
         <div>
-          <h1 class="text-xl font-serif font-bold">EmilyDesigns</h1>
-          <p class="text-xs text-emily-cream">Panel de Control</p>
+          <h1 class="text-xl font-serif font-bold text-emily-dark">EmilyDesigns</h1>
+          <p class="text-xs text-emily-taupe">Panel de Control</p>
         </div>
       </div>
 
-      <nav class="p-4 space-y-1 flex-1 overflow-y-auto">
+      <nav class="p-4 space-y-1 flex-1 overflow-y-auto h-96">
         @for (item of menuItems; track item.route) {
           <a
             [routerLink]="item.route"
-            routerLinkActive="bg-emily-gold text-emily-white"
+            routerLinkActive="bg-emily-rose text-emily-white shadow-sm"
             [routerLinkActiveOptions]="{ exact: item.route === '/admin' }"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-emily-taupe/20 transition group"
+            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-emily-light transition-all group text-emily-dark"
             (click)="closeSidebarMobile()"
           >
             <ng-icon
               [name]="item.icon"
               size="20"
-              class="text-emily-cream group-[.bg-emily-gold]:text-emily-white"
+              class="text-emily-taupe group-[.bg-emily-rose]:text-emily-white transition-colors"
             ></ng-icon>
             <span class="font-medium">{{ item.label }}</span>
             @if (item.badge) {
               <span
-                class="ml-auto bg-emily-rose text-emily-white text-xs font-bold px-2 py-1 rounded-full"
+                class="ml-auto bg-emily-gold text-emily-white text-xs font-bold px-2 py-1 rounded-full shadow-sm"
               >
                 {{ item.badge }}
               </span>
@@ -51,25 +51,25 @@
         }
       </nav>
 
-      <div class="p-4 border-t border-emily-taupe/20">
-        <div class="flex items-center gap-3 px-4 py-3 bg-emily-taupe/10 rounded-lg mb-2">
+      <div class="p-4 border-t border-emily-cream">
+        <div class="flex items-center gap-3 px-4 py-3 bg-emily-cream rounded-lg mb-2">
           <div
-            class="w-10 h-10 bg-emily-gold rounded-full flex items-center justify-center text-emily-white font-bold"
+            class="w-10 h-10 bg-emily-rose rounded-full flex items-center justify-center text-emily-white font-bold shadow-sm"
           >
             {{ authService.currentUser()?.nombre_completo?.charAt(0) || 'A' }}
           </div>
           <div class="flex-1 min-w-0">
-            <p class="font-medium text-sm truncate">
+            <p class="font-medium text-sm truncate text-emily-dark">
               {{ authService.currentUser()?.nombre_completo || 'Admin' }}
             </p>
-            <p class="text-xs text-emily-cream truncate">
+            <p class="text-xs text-emily-taupe truncate">
               {{ authService.currentUser()?.email }}
             </p>
           </div>
         </div>
         <button
           (click)="logout()"
-          class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-emily-rose/20 text-emily-rose transition"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 text-red-600 transition-all border border-transparent hover:border-red-200"
         >
           <ng-icon name="jamLogOut" size="20"></ng-icon>
           <span class="font-medium">Cerrar Sesión</span>
@@ -78,7 +78,10 @@
     </aside>
 
     @if (sidebarOpen()) {
-      <div class="fixed inset-0 bg-black/50 z-30 lg:hidden" (click)="closeSidebarMobile()"></div>
+      <div
+        class="fixed inset-0 bg-emily-dark/50 z-30 lg:hidden backdrop-blur-sm"
+        (click)="closeSidebarMobile()"
+      ></div>
     }
 
     <main class="flex-1 min-h-screen">

@@ -1,0 +1,204 @@
+<div id="analysis-tab-content" class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-serif font-bold text-emily-dark">Análisis Morfológico IA</h2>
+      <p class="text-emily-taupe mt-1">
+        Métricas de análisis de tipo de cuerpo y recomendaciones IA
+      </p>
+    </div>
+    <button
+      (click)="exportarPDF()"
+      class="flex items-center gap-2 px-4 py-2 bg-emily-rose text-emily-white rounded-lg hover:bg-emily-rose/90 transition-colors shadow-sm"
+    >
+      <span>Exportar PDF</span>
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="flex items-center justify-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emily-rose"></div>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-emily-white rounded-xl p-6 shadow-sm border border-emily-cream">
+        <div class="flex items-center justify-between">
+          <div class="p-3 bg-emily-rose rounded-lg">
+            <svg
+              class="w-6 h-6 text-emily-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+              />
+            </svg>
+          </div>
+          <div class="text-right">
+            <p class="text-3xl font-bold text-emily-dark">
+              {{ getTotalAnalysis() }}
+            </p>
+            <p class="text-sm text-emily-taupe mt-1">Análisis Realizados</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-emily-white rounded-xl p-6 shadow-sm border border-emily-cream">
+        <div class="flex items-center justify-between">
+          <div class="p-3 bg-emily-gold rounded-lg">
+            <svg
+              class="w-6 h-6 text-emily-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              />
+            </svg>
+          </div>
+          <div class="text-right">
+            <p class="text-3xl font-bold text-emily-dark">{{ calculateAverageConversion() }}%</p>
+            <p class="text-sm text-emily-taupe mt-1">Conversión Promedio</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-emily-white rounded-xl p-6 shadow-sm border border-emily-cream">
+        <div class="flex items-center justify-between">
+          <div class="p-3 bg-emily-sage rounded-lg">
+            <svg
+              class="w-6 h-6 text-emily-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+            </svg>
+          </div>
+          <div class="text-right">
+            <p class="text-lg font-bold text-emily-dark truncate max-w-37.5">
+              {{ distribucionTipos()?.labels[0] || 'N/A' }}
+            </p>
+            <p class="text-sm text-emily-taupe mt-1">Tipo Más Común</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-emily-white rounded-xl p-6 shadow-sm border border-emily-cream">
+        <h3 class="text-lg font-serif font-semibold text-emily-dark mb-6">
+          Ordenes por Tipo de Cuerpo
+        </h3>
+        <div class="h-80">
+          <canvas id="conversionPorTipoChart"></canvas>
+        </div>
+      </div>
+
+      <div class="bg-emily-white rounded-xl p-6 shadow-sm border border-emily-cream">
+        <h3 class="text-lg font-serif font-semibold text-emily-dark mb-6">
+          Análisis Realizados por Mes
+        </h3>
+        <div class="h-80">
+          <canvas id="analisisPorMesChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-emily-white rounded-xl shadow-sm border border-emily-cream overflow-hidden">
+      <div class="p-6 border-b border-emily-cream">
+        <h3 class="text-lg font-serif font-semibold text-emily-dark">
+          Top 10 Productos Más Recomendados
+        </h3>
+        <p class="text-sm text-emily-taupe mt-1">
+          Productos que la IA recomienda con mayor frecuencia
+        </p>
+      </div>
+
+      @if (topProductos().length === 0) {
+        <div class="p-12 text-center text-emily-taupe">
+          No hay datos de recomendaciones disponibles
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-emily-cream">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-emily-taupe uppercase">
+                  #
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-emily-taupe uppercase">
+                  Producto
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-emily-taupe uppercase">
+                  Categoría
+                </th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-emily-taupe uppercase">
+                  Veces Recomendado
+                </th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-emily-taupe uppercase">
+                  Veces Agregado
+                </th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-emily-taupe uppercase">
+                  Conversión
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-emily-cream">
+              @for (producto of topProductos(); track $index) {
+                <tr class="hover:bg-emily-light transition-colors">
+                  <td class="px-6 py-4">
+                    <span
+                      class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emily-rose text-emily-white text-xs font-bold"
+                    >
+                      {{ $index + 1 }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-sm font-medium text-emily-dark">
+                    {{ producto.nombre }}
+                  </td>
+                  <td class="px-6 py-4 text-sm text-emily-taupe">{{ producto.categoria }}</td>
+                  <td class="px-6 py-4 text-sm font-medium text-emily-dark text-right">
+                    {{ producto.veces_recomendado }}
+                  </td>
+                  <td class="px-6 py-4 text-sm font-medium text-emily-dark text-right">
+                    {{ producto.veces_agregado }}
+                  </td>
+                  <td class="px-6 py-4 text-sm text-right">
+                    <span
+                      class="px-2 py-1 rounded-full text-xs font-medium"
+                      [class.bg-green-100]="producto.tasa_conversion >= 30"
+                      [class.text-green-800]="producto.tasa_conversion >= 30"
+                      [class.bg-yellow-100]="
+                        producto.tasa_conversion >= 15 && producto.tasa_conversion < 30
+                      "
+                      [class.text-yellow-800]="
+                        producto.tasa_conversion >= 15 && producto.tasa_conversion < 30
+                      "
+                      [class.bg-red-100]="producto.tasa_conversion < 15"
+                      [class.text-red-800]="producto.tasa_conversion < 15"
+                    >
+                      {{ producto.tasa_conversion }}%
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>

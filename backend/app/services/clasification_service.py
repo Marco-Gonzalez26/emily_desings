@@ -1,5 +1,6 @@
 from PIL import Image
 import numpy as np
+from fastapi import HTTPException, status
 import io
 from scipy import ndimage
 from rembg import remove, new_session
@@ -10,6 +11,11 @@ import torch.nn.functional as F
 from torchvision import transforms
 import torchvision.models as models
 from pathlib import Path
+from ultralytics import YOLO
+
+import cv2
+
+
 
 # Clases del modelo
 CLASES = ["Apple", "Hourglass", "InvertedTriangle", "Rectangle", "Triangle"]
@@ -23,9 +29,11 @@ MAPEO_CLASES = {
     "Triangle": "Triangulo",
 }
 
+
 # Sesiones globales (se cargan una sola vez)
 _session_rembg = None
 _modelo_clasificacion = None
+yolo_model = None
 
 
 def inicializar_modelos():
@@ -36,23 +44,86 @@ def inicializar_modelos():
     Llamar desde main.py en el evento startup
 
     """
-    print(" Inicializando modelos de IA...")
-    print("Cargando U2Net para segmentación...")
+    print(" Inicializando modelos de IA")
+    print("Cargando U2Net para segmentación")
     get_rembg_session()
-    print(" Cargando ResNet34 para clasificación...")
+    print(" Cargando ResNet34 para clasificación")
     cargar_modelo_clasificacion()
+    print("Cargando Modelo YOLO para detección de persona")
+    get_yolo_model()
+    print("Yolo cargado")
     print("Modelos cargados")
-
 
 
 def get_rembg_session():
     """Obtiene o crea la sesión de rembg (U2Net)"""
     global _session_rembg
     if _session_rembg is None:
-        print("🔧 Inicializando U2Net para segmentación...")
+        print("Inicializando U2Net para segmentación...")
         _session_rembg = new_session("u2net_human_seg")
-        print("✅ U2Net cargado")
+        print("U2Net cargado")
     return _session_rembg
+
+
+def get_yolo_model():
+    """Obtiene o crea la sesión de YOLO"""
+    global yolo_model
+    if yolo_model is None:
+        print("Inicializando YOLO...")
+        yolo_model = YOLO("yolov8n.pt")
+        print("YOLO cargado")
+    return yolo_model
+
+
+def validar_imagen_para_analisis(image_path: str) -> tuple[bool, str]:
+    """
+    Validar que la imagen contenga una persona usando YOLO
+    """
+    # Validar proporciones básicas
+
+       
+    if yolo_model is None:
+        # Si YOLO no está disponible, solo validar por proporciones
+        print("⚠️ YOLO no disponible, validando solo por proporciones")
+        return True, ""
+
+    try:
+        # Detectar objetos en la imagen
+        results = yolo_model(image_path, verbose=False)
+
+        persona_detectada = False
+        confianza_maxima = 0.0
+
+        # Clase 0 en COCO dataset = persona
+        for result in results:
+            boxes = result.boxes
+            for box in boxes:
+                class_id = int(box.cls[0])
+                confidence = float(box.conf[0])
+
+                if class_id == 0:  # Persona
+                    persona_detectada = True
+                    confianza_maxima = max(confianza_maxima, confidence)
+
+        if not persona_detectada:
+            return (
+                False,
+                "No se detectó ninguna persona en la imagen. Por favor, sube una foto de cuerpo completo",
+            )
+
+        if confianza_maxima < 0.5:
+            return (
+                False,
+                "La persona en la imagen no se ve con claridad. Por favor, sube una foto más nítida",
+            )
+
+        print(f" Persona detectada con confianza: {confianza_maxima:.2f}")
+        return True, ""
+
+    except Exception as e:
+        print(f" Error en YOLO: {e}")
+        # Si falla YOLO, continuar con solo validación de proporciones
+        return True, ""
 
 
 def cargar_modelo_clasificacion():
@@ -63,7 +134,7 @@ def cargar_modelo_clasificacion():
     global _modelo_clasificacion
 
     if _modelo_clasificacion is None:
-        print("🔧 Cargando modelo ResNet34...")
+        print("Cargando modelo ResNet34...")
 
         # Crear arquitectura base ResNet34
         _modelo_clasificacion = models.resnet34(
@@ -162,41 +233,33 @@ def segmentar_imagen(
         alpha = np.array(img_rgba.split()[3])
         return (alpha > 128).sum() / alpha.size
 
-    # Intento 1: sin crop
+    # Segmentar imagen completa
     print(" Segmentando imagen completa...")
     seg_full = _segmentar(img_original)
     cobertura = _cobertura(seg_full)
     print(f"   Cobertura: {cobertura:.2%}")
-
-    # Guardar imagen segmentada si debug está activo
     if debug:
         debug_path = img_path.replace(".jpg", "_segmentada.png").replace(
             ".jpeg", "_segmentada.png"
         )
         seg_full.save(debug_path)
         print(f"🔍 DEBUG: Imagen segmentada guardada en: {debug_path}")
-
     if cobertura >= 0.05:
         print("Segmentación completada")
         return seg_full
-
-    # Intento 2: con crop central
+    # Segmentar con crop central si es necesario
     print("Intentando con crop central...")
     margen = int(W * (1 - crop_ratio) / 2)
     img_crop = img_original.crop((margen, 0, W - margen, H))
     seg_crop = _segmentar(img_crop)
-
     canvas = Image.new("RGBA", img_original.size, (0, 0, 0, 0))
     canvas.paste(seg_crop, (margen, 0))
-
-    # Guardar versión con crop si debug está activo
     if debug:
         debug_path_crop = img_path.replace(".jpg", "_segmentada_crop.png").replace(
             ".jpeg", "_segmentada_crop.png"
         )
         canvas.save(debug_path_crop)
         print(f"🔍 DEBUG: Imagen con crop guardada en: {debug_path_crop}")
-
     print(" Segmentación con crop exitosa")
     return canvas
 
@@ -290,7 +353,12 @@ def clasificar_tipo_cuerpo(img_path: str, debug: bool = False) -> Dict[str, any]
         }
     """
 
-    # Segmentación con U2Net
+    # Detectar persona con MediaPipe
+    es_valido, mensaje_error = validar_imagen_para_analisis(img_path)
+    if not es_valido:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=mensaje_error)
+        return
+
     print("\n Segmentación")
     img_segmentada = segmentar_imagen(img_path, debug=debug)
 
@@ -316,7 +384,7 @@ def clasificar_tipo_cuerpo(img_path: str, debug: bool = False) -> Dict[str, any]
     tipo_cuerpo_ingles = resultado_modelo["clase"]
     tipo_cuerpo_espanol = MAPEO_CLASES.get(tipo_cuerpo_ingles, tipo_cuerpo_ingles)
 
-    print(f"✅ Clasificación: {tipo_cuerpo_ingles} → {tipo_cuerpo_espanol}")
+    print(f" Clasificación: {tipo_cuerpo_ingles} → {tipo_cuerpo_espanol}")
     print(f"   Confianza: {resultado_modelo['confianza']:.2%}")
 
     return {

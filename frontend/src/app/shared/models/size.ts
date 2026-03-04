@@ -1,7 +1,7 @@
 export interface Talla {
   id: string;
   nombre: string;
-  abreviatura?: string;
+
   orden: number;
   activo: boolean;
   created_at: string;
@@ -9,14 +9,14 @@ export interface Talla {
 
 export interface TallaCreate {
   nombre: string;
-  abreviatura?: string;
+
   orden?: number;
   activo?: boolean;
 }
 
 export interface TallaUpdate {
   nombre?: string;
-  abreviatura?: string;
+
   orden?: number;
   activo?: boolean;
 }

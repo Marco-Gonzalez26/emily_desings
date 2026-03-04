@@ -16,8 +16,9 @@ import {
   jamClose,
   jamFiles,
   jamDocument,
+  jamWorld,
 } from '@ng-icons/jam-icons';
-import { AuthService } from '../../../core/services/auth';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface MenuItem {
   label: string;
@@ -45,14 +46,20 @@ interface MenuItem {
       jamClose,
       jamFiles,
       jamDocument,
+      jamWorld,
     }),
   ],
   templateUrl: './admin-layout.component.html',
 })
 export class AdminLayoutComponent {
+  constructor(
+    public authService: AuthService,
+    private router: Router,
+  ) {}
   sidebarOpen = signal(false);
 
   menuItems: MenuItem[] = [
+    { label: 'Ir a la web', icon: 'jamWorld', route: '/catalogo' },
     { label: 'Dashboard', icon: 'jamDashboard', route: '/admin' },
     { label: 'Productos', icon: 'jamBox', route: '/admin/productos' },
     { label: 'Categorías', icon: 'jamGrid', route: '/admin/categorias' },
@@ -60,15 +67,9 @@ export class AdminLayoutComponent {
     { label: 'Colores', icon: 'jamPicture', route: '/admin/colores' },
     { label: 'Tallas', icon: 'jamRuler', route: '/admin/tallas' },
     { label: 'Inventario', icon: 'jamShoppingBag', route: '/admin/inventario' },
-    { label: 'Órdenes', icon: 'jamDocument', route: '/admin/ordenes', badge: 3 },
-    { label: 'Usuarios', icon: 'jamUsers', route: '/admin/usuarios' },
-    { label: 'Reportes', icon: 'jamFiles', route: '/admin/reportes' },
+    { label: 'Órdenes', icon: 'jamDocument', route: '/admin/ordenes' },
+    { label: 'Usuarios', icon: 'jamUsers', route: '/admin/usuarios' }
   ];
-
-  constructor(
-    public authService: AuthService,
-    private router: Router,
-  ) {}
 
   toggleSidebar(): void {
     this.sidebarOpen.update((v) => !v);

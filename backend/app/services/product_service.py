@@ -128,13 +128,18 @@ def create_producto(
     Raises:
         HTTPException: Si el SKU ya existe
     """
-    # Verificar que el SKU no exista
-    existing_producto = get_producto_by_sku(db, producto_data.sku)
-    if existing_producto:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Ya existe un producto con el SKU '{producto_data.sku}'",
-        )
+
+    if not producto_data.sku or producto_data.sku.strip() == "" or producto_data.sku == "AUTO": 
+        sku = generate_sku(db, producto_data.marca_id)
+        producto_data.sku = sku
+    else:
+        # Verificar que el SKU no exista
+        existing_producto = get_producto_by_sku(db, producto_data.sku)
+        if existing_producto:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Ya existe un producto con el SKU '{producto_data.sku}'",
+            )
 
     # Validar que precio_descuento sea menor que precio_regular
     if (
@@ -290,3 +295,54 @@ def get_productos_en_oferta(db: Session, limit: int = 10) -> List[Producto]:
         .limit(limit)
         .all()
     )
+
+
+# app/services/product_service.py
+
+
+def generate_sku(db: Session, marca_id: UUID = None) -> str:
+    """
+    Generar SKU automático basado en la marca
+
+    Formato: MARCA-0001
+    - Si tiene marca: NIKE-0001, ADID-0002
+    - Sin marca: PROD-0001
+
+    Args:
+        db: Sesión de base de datos
+        marca_id: UUID de la marca (opcional)
+
+    Returns:
+        SKU único generado
+    """
+    from app.models.models import Marca
+
+    # Determinar el prefijo
+    if marca_id:
+        marca = db.query(Marca).filter(Marca.id == marca_id).first()
+        if marca:
+            # Tomar primeras 4 letras del nombre de la marca
+            # Remover espacios y caracteres especiales
+            prefijo = marca.nombre.upper().replace(" ", "")[:4]
+        else:
+            prefijo = "PROD"
+    else:
+        prefijo = "PROD"
+
+    # Contar cuántos productos existen con este prefijo
+    productos_con_prefijo = (
+        db.query(Producto).filter(Producto.sku.like(f"{prefijo}-%")).count()
+    )
+
+    # Siguiente número
+    numero = productos_con_prefijo + 1
+
+    # Formatear SKU: NIKE-0001
+    sku = f"{prefijo}-{numero:04d}"
+
+    # Verificar unicidad (por si hay eliminados o gaps)
+    while db.query(Producto).filter(Producto.sku == sku).first():
+        numero += 1
+        sku = f"{prefijo}-{numero:04d}"
+
+    return sku

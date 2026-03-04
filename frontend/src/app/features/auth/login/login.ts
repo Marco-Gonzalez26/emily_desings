@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { jamEye, jamEyeClose } from '@ng-icons/jam-icons';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../../core/services/auth';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -50,10 +50,8 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(credentials).subscribe({
       next: (response) => {
-        console.log('Login aqui -> ', response);
         this.isLoading = false;
 
-        // Redirigir según el rol
         if (response.user.rol === 'administrador') {
           this.router.navigate(['/admin']);
         } else {

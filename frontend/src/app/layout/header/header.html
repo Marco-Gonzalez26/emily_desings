@@ -37,6 +37,9 @@
           }
         </a>
       </li>
+      @if (currentUser()?.rol === 'administrador') {
+        <a routerLink="/admin" class="hover:opacity-70 transition-opacity"> Administración </a>
+      }
 
       @if (!authService.isLoggedIn()) {
         <li>

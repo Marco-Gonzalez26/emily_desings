@@ -19,7 +19,7 @@ import {
 } from '@ng-icons/jam-icons';
 import { Router, RouterLink } from '@angular/router';
 import { gsap } from 'gsap';
-import { AuthService } from '../../core/services/auth';
+import { AuthService } from '../../core/services/auth.service';
 import { CartService } from '../../core/services/cart.service';
 
 @Component({

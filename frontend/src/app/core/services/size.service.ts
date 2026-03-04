@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Talla, TallaCreate, TallaUpdate } from '../../shared/models/size';
 import { Observable } from 'rxjs';
-import { ApiService } from './api';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root',

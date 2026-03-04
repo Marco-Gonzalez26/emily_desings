@@ -29,25 +29,25 @@ export class AboutUsComponent implements AfterViewInit {
       title: 'Autenticidad',
       description:
         'Creemos en la moda que refleja tu verdadero yo, sin seguir tendencias pasajeras sino creando un estilo atemporal.',
-      icon: '✨',
+      icon: '',
     },
     {
       title: 'Calidad',
       description:
         'Cada prenda es seleccionada cuidadosamente, priorizando materiales nobles y confección impecable.',
-      icon: '👗',
+      icon: '',
     },
     {
       title: 'Sostenibilidad',
       description:
         'Nos comprometemos con prácticas éticas y sostenibles, trabajando con artesanos locales de Quevedo.',
-      icon: '🌱',
+      icon: '',
     },
     {
       title: 'Inclusividad',
       description:
         'La moda es para todos. Celebramos la diversidad de cuerpos, estilos y personalidades.',
-      icon: '💜',
+      icon: '',
     },
   ];
 
