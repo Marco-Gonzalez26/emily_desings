@@ -162,7 +162,7 @@
               @for (color of coloresDisponibles(); track color.id) {
                 <button
                   (click)="selectColor(color)"
-                  class="w-8 h-8 rounded-full transition-transform hover:scale-110 relative"
+                  class="w-8 h-8 rounded-full transition-transform hover:scale-110 relative border-2 border-emily-taupe"
                   [style.backgroundColor]="color.codigo_hexadecimal || '#ccc'"
                   [title]="color.nombre"
                 >

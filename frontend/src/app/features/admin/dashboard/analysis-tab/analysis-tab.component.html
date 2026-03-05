@@ -96,26 +96,54 @@
         </div>
       </div>
     </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    @if (metricasConversion()) {
       <div class="bg-emily-white rounded-xl p-6 shadow-sm border border-emily-cream">
         <h3 class="text-lg font-serif font-semibold text-emily-dark mb-6">
-          Ordenes por Tipo de Cuerpo
+          Embudo de Conversión - Análisis Morfológico
         </h3>
-        <div class="h-80">
-          <canvas id="conversionPorTipoChart"></canvas>
-        </div>
-      </div>
 
-      <div class="bg-emily-white rounded-xl p-6 shadow-sm border border-emily-cream">
-        <h3 class="text-lg font-serif font-semibold text-emily-dark mb-6">
-          Análisis Realizados por Mes
-        </h3>
-        <div class="h-80">
-          <canvas id="analisisPorMesChart"></canvas>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div class="text-center">
+            <p class="text-2xl font-bold text-emily-dark">
+              {{ metricasConversion().total_analisis }}
+            </p>
+            <p class="text-sm text-emily-taupe">Análisis Realizados</p>
+          </div>
+          <div class="text-center">
+            <p class="text-2xl font-bold text-blue-600">
+              {{ metricasConversion().items_carrito_analisis }}
+            </p>
+            <p class="text-sm text-emily-taupe">Agregados al Carrito</p>
+            <p class="text-xs text-blue-600 font-medium mt-1">
+              {{ metricasConversion().tasa_analisis_a_carrito }}%
+            </p>
+          </div>
+          <div class="text-center">
+            <p class="text-2xl font-bold text-green-600">
+              {{ metricasConversion().items_vendidos_analisis }}
+            </p>
+            <p class="text-sm text-emily-taupe">Productos Comprados</p>
+            <p class="text-xs text-green-600 font-medium mt-1">
+              {{ metricasConversion().tasa_analisis_a_compra }}%
+            </p>
+          </div>
+          <div class="text-center">
+            <p class="text-2xl font-bold text-emily-rose">
+              {{ formatCurrency(metricasConversion().ingresos_analisis) }}
+            </p>
+            <p class="text-sm text-emily-taupe">Ingresos Generados</p>
+            <p class="text-xs text-emily-taupe font-medium mt-1">
+              Ticket: {{ formatCurrency(metricasConversion().ticket_promedio_analisis) }}
+            </p>
+          </div>
+        </div>
+
+        <div class="h-64">
+          <canvas id="funnelConversionChart"></canvas>
         </div>
       </div>
-    </div>
+    }
+
 
     <div class="bg-emily-white rounded-xl shadow-sm border border-emily-cream overflow-hidden">
       <div class="p-6 border-b border-emily-cream">

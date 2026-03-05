@@ -25,7 +25,16 @@ import { CartService } from '../../core/services/cart.service';
 @Component({
   selector: 'app-header',
   imports: [CommonModule, NgIconComponent, RouterLink],
-  providers: [provideIcons({ jamShoppingCart, jamUser, jamMenu, jamClose, jamLogOut, jamBox })],
+  providers: [
+    provideIcons({
+      jamShoppingCart,
+      jamUser,
+      jamMenu,
+      jamClose,
+      jamLogOut,
+      jamBox,
+    }),
+  ],
   templateUrl: './header.html',
   styleUrl: './header.css',
 })

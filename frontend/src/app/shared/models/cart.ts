@@ -10,7 +10,7 @@ export interface CartItem {
   color_id: string;
   cantidad: number;
   precio_unitario: number | string;
-
+  origen: string;
   talla?: Talla;
   color?: Color;
   producto?: Product;
@@ -37,6 +37,8 @@ export interface AddItemRequest {
   talla_id: string;
   color_id: string;
   cantidad: number;
+
+  origen: string;
 }
 
 export interface UpdateItemRequest {

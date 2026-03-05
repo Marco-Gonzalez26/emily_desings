@@ -194,3 +194,11 @@ def get_productos_mas_recomendados(
 ):
     """Productos que más se recomiendan por IA"""
     return dashboard_service.obtener_productos_mas_recomendados(db, limit)
+
+@router.get("/analisis/conversion-ordenes")
+def get_analisis_conversion(
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_admin_user)
+):
+    """Métricas de conversión del análisis morfológico"""
+    return dashboard_service.obtener_metricas_analisis_conversion(db)

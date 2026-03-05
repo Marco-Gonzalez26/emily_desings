@@ -18,12 +18,12 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
         case 403:
 
-          router.navigate(['/inicio']);
+          router.navigate(['/']);
           break;
 
         case 404:
 
-          router.navigate(['/inicio']);
+          router.navigate(['/']);
           break;
 
         case 500:

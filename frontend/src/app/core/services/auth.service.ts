@@ -172,4 +172,12 @@ export class AuthService {
       return null;
     }
   }
+  changePassword(data: {
+    email: string;
+    password_actual: string;
+    password_nueva: string;
+    password_confirmacion: string;
+  }): Observable<any> {
+    return this.apiService.post('/api/auth/reestablecer-contraseña', data);
+  }
 }

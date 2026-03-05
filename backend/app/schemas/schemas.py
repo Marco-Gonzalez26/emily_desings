@@ -44,6 +44,47 @@ class UsuarioResponse(UsuarioBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UsuarioCreateAdmin(BaseModel):
+    """Crear usuario desde admin"""
+
+    email: str = Field(..., min_length=3, max_length=255)
+    password: str = Field(..., min_length=6)
+    nombre_completo: Optional[str] = Field(None, max_length=200)
+    telefono: Optional[str] = Field(None, max_length=20)
+    direccion: Optional[str] = Field(None, max_length=500)
+    cedula_ruc: Optional[str] = Field(None, max_length=20)
+    rol: str = Field(default="cliente") 
+
+    @field_validator("email")
+    def validate_email(cls, v):
+        if "@" not in v:
+            raise ValueError("Email inválido")
+        return v.lower()
+
+    @field_validator("rol")
+    def validate_rol(cls, v):
+        if v not in ["cliente", "administrador"]:
+            raise ValueError("Rol debe ser cliente o administrador")
+        return v
+
+
+class CambiarPasswordRequest(BaseModel):
+    """Cambiar contraseña (con contraseña actual)"""
+
+    email: str = Field(..., description="Email del usuario")
+    password_actual: str = Field(..., description="Contraseña actual")
+    password_nueva: str = Field(..., min_length=6, description="Nueva contraseña")
+    password_confirmacion: str = Field(
+        ..., description="Confirmación de nueva contraseña"
+    )
+
+    @field_validator("password_confirmacion")
+    def passwords_match(cls, v, values):
+        if "password_nueva" in values.data and v != values.data["password_nueva"]:
+            raise ValueError("Las contraseñas no coinciden")
+        return v
+
+
 class ProductoBase(BaseModel):
     """Esquema base de producto"""
 
@@ -218,6 +259,7 @@ class CarritoItemBase(BaseModel):
     color_id: UUID
     cantidad: int = Field(..., gt=0)
     precio_unitario: Decimal
+    origen: Optional[str] = Field(default="catalogo")
 
 
 class CarritoItemCreate(CarritoItemBase):
@@ -241,6 +283,8 @@ class CarritoItemResponse(BaseModel):
     talla: Optional[TallaResponse] = None
 
     color: Optional[ColorResponse] = None
+
+    origen: Optional[str] = Field(default="catalogo")
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -277,6 +321,7 @@ class OrdenItemCreate(BaseModel):
     cantidad: int = Field(..., gt=0)
     precio_unitario: Decimal
     subtotal: Decimal
+    origen: Optional[str] = Field(default="catalogo")
 
 
 class OrdenItemResponse(BaseModel):
@@ -302,6 +347,7 @@ class OrdenCreate(BaseModel):
     impuestos: Decimal = Decimal("0")
     total: Decimal
     metodo_pago: str
+
     items: List[OrdenItemCreate]
 
 
@@ -323,7 +369,7 @@ class OrdenResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     items: List[OrdenItemResponse] = []
-    usuario: Optional[UsuarioBase] = None
+    usuario: Optional[UsuarioResponse] = None
     model_config = ConfigDict(from_attributes=True)
 
 

@@ -1,6 +1,6 @@
 from io import BytesIO
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import (
@@ -27,7 +27,6 @@ def generar_pdf_orden(orden: Orden) -> BytesIO:
     elements = []
     styles = getSampleStyleSheet()
 
-
     title_style = ParagraphStyle(
         "CustomTitle",
         parent=styles["Heading1"],
@@ -52,11 +51,9 @@ def generar_pdf_orden(orden: Orden) -> BytesIO:
         textColor=colors.HexColor("#6B5B4F"),  # emily-taupe
     )
 
-
     title = Paragraph("Emily Designs", title_style)
     elements.append(title)
     elements.append(Spacer(1, 0.2 * inch))
-
 
     info_data = [
         ["Número de Orden:", orden.numero_orden],
@@ -83,12 +80,10 @@ def generar_pdf_orden(orden: Orden) -> BytesIO:
     elements.append(info_table)
     elements.append(Spacer(1, 0.3 * inch))
 
-
     elements.append(Paragraph("Dirección de Envío", heading_style))
     direccion = Paragraph(orden.direccion_envio, normal_style)
     elements.append(direccion)
     elements.append(Spacer(1, 0.3 * inch))
-
 
     elements.append(Paragraph("Productos", heading_style))
 
@@ -133,7 +128,6 @@ def generar_pdf_orden(orden: Orden) -> BytesIO:
     elements.append(items_table)
     elements.append(Spacer(1, 0.3 * inch))
 
-
     totales_data = [
         ["Subtotal:", f"${float(orden.subtotal):.2f}"],
         ["Envío:", f"${float(orden.costo_envio):.2f}"],
@@ -166,7 +160,6 @@ def generar_pdf_orden(orden: Orden) -> BytesIO:
     elements.append(totales_table)
     elements.append(Spacer(1, 0.5 * inch))
 
-
     footer_style = ParagraphStyle(
         "Footer",
         parent=styles["Normal"],
@@ -181,6 +174,351 @@ def generar_pdf_orden(orden: Orden) -> BytesIO:
     )
     elements.append(footer)
 
+    doc.build(elements)
+    buffer.seek(0)
+
+    return buffer
+
+
+def generar_ventas_pdf(data: dict) -> BytesIO:
+    """
+    Generar PDF de reporte de ventas
+    """
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    elements = []
+
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle(
+        "CustomTitle",
+        parent=styles["Heading1"],
+        fontSize=24,
+        textColor=colors.HexColor("#D4A5A5"),
+        spaceAfter=30,
+        alignment=TA_CENTER,
+    )
+
+    subtitle_style = ParagraphStyle(
+        "CustomSubtitle",
+        parent=styles["Heading2"],
+        fontSize=14,
+        textColor=colors.HexColor("#2D2424"),
+        spaceAfter=12,
+        alignment=TA_LEFT,
+    )
+
+    elements.append(Paragraph("EMILY DESIGNS", title_style))
+    elements.append(Paragraph("Reporte de Ventas por Período", subtitle_style))
+    elements.append(Spacer(1, 12))
+
+    fecha_generacion = datetime.now().strftime("%d/%m/%Y %H:%M")
+    elements.append(
+        Paragraph(f"Fecha de generación: {fecha_generacion}", styles["Normal"])
+    )
+    elements.append(Spacer(1, 20))
+
+    summary_data = [
+        ["Métrica", "Valor"],
+        ["Total Ventas", f"${data['total_ventas']:,.2f}"],
+        ["Total Órdenes", f"{data['total_ordenes']}"],
+        ["Ticket Promedio", f"${data['ticket_promedio']:,.2f}"],
+    ]
+
+    summary_table = Table(summary_data, colWidths=[3 * inch, 3 * inch])
+    summary_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#D4A5A5")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, 0), 12),
+                ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
+                ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
+                ("GRID", (0, 0), (-1, -1), 1, colors.black),
+            ]
+        )
+    )
+
+    elements.append(summary_table)
+    elements.append(Spacer(1, 30))
+
+    elements.append(Paragraph("Detalle de Órdenes", subtitle_style))
+    elements.append(Spacer(1, 12))
+
+    ordenes_data = [["N° Orden", "Fecha", "Cliente", "Total", "Estado"]]
+
+    for orden in data["ordenes"]:
+        ordenes_data.append(
+            [
+                orden["numero_orden"],
+                orden["fecha"],
+                orden["cliente"][:30],
+                f"${orden['total']:,.2f}",
+                orden["estado"],
+            ]
+        )
+
+    ordenes_table = Table(
+        ordenes_data, colWidths=[1.2 * inch, 1.3 * inch, 2 * inch, 1 * inch, 1.2 * inch]
+    )
+    ordenes_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#D4A5A5")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, 0), 10),
+                ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
+                ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
+                ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                ("FONTSIZE", (0, 1), (-1, -1), 8),
+            ]
+        )
+    )
+
+    elements.append(ordenes_table)
+
+    doc.build(elements)
+    buffer.seek(0)
+
+    return buffer
+
+
+def generar_productos_vendidos_pdf(productos: list) -> BytesIO:
+    """
+    Generar PDF de productos más vendidos
+    """
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    elements = []
+
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle(
+        "CustomTitle",
+        parent=styles["Heading1"],
+        fontSize=24,
+        textColor=colors.HexColor("#D4A5A5"),
+        spaceAfter=30,
+        alignment=TA_CENTER,
+    )
+
+    subtitle_style = ParagraphStyle(
+        "CustomSubtitle",
+        parent=styles["Heading2"],
+        fontSize=14,
+        textColor=colors.HexColor("#2D2424"),
+        spaceAfter=12,
+    )
+
+    elements.append(Paragraph("EMILY DESIGNS", title_style))
+    elements.append(Paragraph("Productos Más Vendidos", subtitle_style))
+    elements.append(Spacer(1, 20))
+
+    fecha_generacion = datetime.now().strftime("%d/%m/%Y %H:%M")
+    elements.append(
+        Paragraph(f"Fecha de generación: {fecha_generacion}", styles["Normal"])
+    )
+    elements.append(Spacer(1, 20))
+
+    productos_data = [["#", "Producto", "Categoría", "Cantidad", "Ingresos"]]
+
+    for idx, prod in enumerate(productos, 1):
+        productos_data.append(
+            [
+                str(idx),
+                prod["producto"][:40],
+                prod["categoria"],
+                str(prod["cantidad_vendida"]),
+                f"${prod['ingresos']:,.2f}",
+            ]
+        )
+
+    productos_table = Table(
+        productos_data,
+        colWidths=[0.5 * inch, 2.5 * inch, 1.5 * inch, 1 * inch, 1.2 * inch],
+    )
+    productos_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#D4A5A5")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, 0), 10),
+                ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
+                ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
+                ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                ("FONTSIZE", (0, 1), (-1, -1), 9),
+            ]
+        )
+    )
+
+    elements.append(productos_table)
+
+    doc.build(elements)
+    buffer.seek(0)
+
+    return buffer
+
+
+def generar_stock_bajo_pdf(inventarios: list) -> BytesIO:
+    """
+    Generar PDF de stock bajo
+    """
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    elements = []
+
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle(
+        "CustomTitle",
+        parent=styles["Heading1"],
+        fontSize=24,
+        textColor=colors.HexColor("#D4A5A5"),
+        spaceAfter=30,
+        alignment=TA_CENTER,
+    )
+
+    subtitle_style = ParagraphStyle(
+        "CustomSubtitle",
+        parent=styles["Heading2"],
+        fontSize=14,
+        textColor=colors.HexColor("#2D2424"),
+        spaceAfter=12,
+    )
+
+    elements.append(Paragraph("EMILY DESIGNS", title_style))
+    elements.append(Paragraph("Alerta de Stock Bajo", subtitle_style))
+    elements.append(Spacer(1, 20))
+
+    fecha_generacion = datetime.now().strftime("%d/%m/%Y %H:%M")
+    elements.append(
+        Paragraph(f"Fecha de generación: {fecha_generacion}", styles["Normal"])
+    )
+    elements.append(Spacer(1, 20))
+
+    stock_data = [
+        ["Producto", "Categoría", "Stock Disponible", "Stock Total", "Reservado"]
+    ]
+
+    for inv in inventarios:
+        stock_data.append(
+            [
+                inv["producto"][:35],
+                inv["categoria"],
+                str(inv["stock_disponible"]),
+                str(inv["stock_total"]),
+                str(inv["stock_reservado"]),
+            ]
+        )
+
+    stock_table = Table(
+        stock_data, colWidths=[2.2 * inch, 1.5 * inch, 1.2 * inch, 1 * inch, 1 * inch]
+    )
+    stock_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#D4A5A5")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, 0), 10),
+                ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
+                ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
+                ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                ("FONTSIZE", (0, 1), (-1, -1), 9),
+            ]
+        )
+    )
+
+    elements.append(stock_table)
+
+    doc.build(elements)
+    buffer.seek(0)
+
+    return buffer
+
+
+def generar_clientes_pdf(clientes: list) -> BytesIO:
+    """
+    Generar PDF de mejores clientes
+    """
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    elements = []
+
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle(
+        "CustomTitle",
+        parent=styles["Heading1"],
+        fontSize=24,
+        textColor=colors.HexColor("#D4A5A5"),
+        spaceAfter=30,
+        alignment=TA_CENTER,
+    )
+
+    subtitle_style = ParagraphStyle(
+        "CustomSubtitle",
+        parent=styles["Heading2"],
+        fontSize=14,
+        textColor=colors.HexColor("#2D2424"),
+        spaceAfter=12,
+    )
+
+    elements.append(Paragraph("EMILY DESIGNS", title_style))
+    elements.append(Paragraph("Mejores Clientes", subtitle_style))
+    elements.append(Spacer(1, 20))
+
+    fecha_generacion = datetime.now().strftime("%d/%m/%Y %H:%M")
+    elements.append(
+        Paragraph(f"Fecha de generación: {fecha_generacion}", styles["Normal"])
+    )
+    elements.append(Spacer(1, 20))
+
+    clientes_data = [["#", "Cliente", "Órdenes", "Total Gastado", "Ticket Promedio"]]
+
+    for idx, cliente in enumerate(clientes, 1):
+        clientes_data.append(
+            [
+                str(idx),
+                cliente["cliente"][:30],
+                str(cliente["total_ordenes"]),
+                f"${cliente['total_gastado']:,.2f}",
+                f"${cliente['ticket_promedio']:,.2f}",
+            ]
+        )
+
+    clientes_table = Table(
+        clientes_data,
+        colWidths=[0.5 * inch, 2.5 * inch, 1 * inch, 1.3 * inch, 1.3 * inch],
+    )
+    clientes_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#D4A5A5")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, 0), 10),
+                ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
+                ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
+                ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                ("FONTSIZE", (0, 1), (-1, -1), 9),
+            ]
+        )
+    )
+
+    elements.append(clientes_table)
 
     doc.build(elements)
     buffer.seek(0)

@@ -11,6 +11,7 @@ import {
   InventoryWithDetails,
   StockBajoResponse,
 } from '../../shared/models/inventory';
+import { ColorDisponible, TallaDisponible } from '@app/shared/models/quick_add';
 
 @Injectable({
   providedIn: 'root',
@@ -18,7 +19,6 @@ import {
 export class InventarioService {
   private api = inject(ApiService);
 
-  // Listar inventario con filtros (admin)
   getInventarios(filters?: InventoryFilters): Observable<InventoryListResponse> {
     const params = new URLSearchParams();
 
@@ -36,14 +36,19 @@ export class InventarioService {
     return this.api.get<InventoryListResponse>(url);
   }
 
-  // Inventario disponible de un producto (público)
   getInventarioProducto(productoId: string): Observable<InventoryWithDetails[]> {
     return this.api.get<InventoryWithDetails[]>(`/api/inventario/producto/${productoId}`);
   }
 
-  // TODO el inventario de un producto (admin - incluye stock 0)
   getAllInventarioProducto(productoId: string): Observable<InventoryWithDetails[]> {
     return this.api.get<InventoryWithDetails[]>(`/api/inventario/producto/${productoId}/all`);
+  }
+
+  obtenerInventarioQuickAdd(productoId: string): Observable<{
+    tallas_disponibles: TallaDisponible[];
+    colores_disponibles: ColorDisponible[];
+  }> {
+    return this.api.get(`/api/inventario/producto/${productoId}/analisis-morfologico`);
   }
 
   getStockDisponible(

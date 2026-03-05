@@ -14,10 +14,8 @@ from app.models.models import (
     Inventario,
     RecomendacionGenerada,
     Marca,
+    CarritoItem,
 )
-
-
-# Helper functions
 
 
 def calcular_rango_fechas(meses: int = 1) -> Dict[str, datetime]:
@@ -707,7 +705,7 @@ def obtener_ventas_mes_especifico(db: Session, year: int, month: int) -> Dict[st
 
     Returns:
         {
-            "mes": "Ene 2025",
+            "mes": "Ene 2026",
             "total": 15000.50,
             "ordenes": 45
         }
@@ -738,6 +736,109 @@ def obtener_ventas_mes_especifico(db: Session, year: int, month: int) -> Dict[st
 
 
 # Análisis morfológico
+
+
+def obtener_metricas_analisis_conversion(db: Session) -> Dict[str, Any]:
+    """
+    Métricas completas de conversión del análisis morfológico
+    Desde análisis → carrito → orden → pago
+    """
+
+    from sqlalchemy import func, case
+    from datetime import datetime, timedelta
+
+    # Período: último mes
+    hace_un_mes = datetime.now() - timedelta(days=30)
+
+    # 1. Total de análisis realizados
+    total_analisis = (
+        db.query(func.count(AnalisisMorfologico.id))
+        .filter(AnalisisMorfologico.fecha_analisis >= hace_un_mes)
+        .scalar()
+    ) or 0
+
+    # 2. Productos agregados al carrito desde análisis
+    items_carrito_analisis = (
+        db.query(func.count(CarritoItem.id))
+        .filter(CarritoItem.origen == "analisis")
+        .scalar()
+    ) or 0
+
+    # 3. Productos comprados desde análisis (órdenes confirmadas)
+    items_vendidos_analisis = (
+        db.query(func.count(OrdenItem.id))
+        .join(Orden)
+        .filter(
+            OrdenItem.origen == "analisis",
+            Orden.estado.in_(["Confirmado", "En Proceso", "Enviado", "Entregado"]),
+        )
+        .scalar()
+    ) or 0
+
+    # 4. Ingresos generados por análisis
+    ingresos_analisis = (
+        db.query(func.sum(OrdenItem.subtotal))
+        .join(Orden)
+        .filter(
+            OrdenItem.origen == "analisis",
+            Orden.estado.in_(["Confirmado", "En Proceso", "Enviado", "Entregado"]),
+        )
+        .scalar()
+    ) or 0
+
+    # 5. Órdenes con al menos un producto del análisis
+    ordenes_con_analisis = (
+        db.query(func.count(func.distinct(Orden.id)))
+        .join(OrdenItem)
+        .filter(
+            OrdenItem.origen == "analisis",
+            Orden.estado.in_(["Confirmado", "En Proceso", "Enviado", "Entregado"]),
+        )
+        .scalar()
+    ) or 0
+
+    # 6. Análisis que resultaron en compra
+    analisis_con_compra = (
+        db.query(func.count(func.distinct(RecomendacionGenerada.analisis_id)))
+        .join(OrdenItem, OrdenItem.producto_id == RecomendacionGenerada.producto_id)
+        .join(Orden)
+        .filter(
+            OrdenItem.origen == "analisis",
+            Orden.estado.in_(["Confirmado", "En Proceso", "Enviado", "Entregado"]),
+            RecomendacionGenerada.fecha_creacion >= hace_un_mes,
+        )
+        .scalar()
+    ) or 0
+
+    # Calcular tasas de conversión
+    tasa_analisis_a_carrito = (
+        (items_carrito_analisis / total_analisis * 100) if total_analisis > 0 else 0
+    )
+    tasa_analisis_a_compra = (
+        (analisis_con_compra / total_analisis * 100) if total_analisis > 0 else 0
+    )
+    tasa_carrito_a_compra = (
+        (items_vendidos_analisis / items_carrito_analisis * 100)
+        if items_carrito_analisis > 0
+        else 0
+    )
+
+    return {
+        "total_analisis": total_analisis,
+        "items_carrito_analisis": items_carrito_analisis,
+        "items_vendidos_analisis": items_vendidos_analisis,
+        "ordenes_con_analisis": ordenes_con_analisis,
+        "analisis_con_compra": analisis_con_compra,
+        "ingresos_analisis": float(ingresos_analisis),
+        "tasa_analisis_a_carrito": round(tasa_analisis_a_carrito, 1),
+        "tasa_analisis_a_compra": round(tasa_analisis_a_compra, 1),
+        "tasa_carrito_a_compra": round(tasa_carrito_a_compra, 1),
+        "ticket_promedio_analisis": (
+            round(float(ingresos_analisis) / ordenes_con_analisis, 2)
+            if ordenes_con_analisis > 0
+            else 0
+        ),
+    }
 
 
 def obtener_conversion_por_tipo_cuerpo(db: Session) -> Dict[str, Any]:

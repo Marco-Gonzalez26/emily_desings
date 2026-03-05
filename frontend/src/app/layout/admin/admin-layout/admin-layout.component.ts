@@ -68,7 +68,8 @@ export class AdminLayoutComponent {
     { label: 'Tallas', icon: 'jamRuler', route: '/admin/tallas' },
     { label: 'Inventario', icon: 'jamShoppingBag', route: '/admin/inventario' },
     { label: 'Órdenes', icon: 'jamDocument', route: '/admin/ordenes' },
-    { label: 'Usuarios', icon: 'jamUsers', route: '/admin/usuarios' }
+    { label: 'Usuarios', icon: 'jamUsers', route: '/admin/usuarios' },
+    { label: 'Reportes', icon: 'jamFiles', route: '/admin/reportes' },
   ];
 
   toggleSidebar(): void {

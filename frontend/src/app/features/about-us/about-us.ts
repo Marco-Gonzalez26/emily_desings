@@ -66,7 +66,7 @@ export class AboutUsComponent implements AfterViewInit {
   }
 
   private initAnimations(): void {
-    // Animación del hero
+
     if (this.heroSection) {
       gsap
         .timeline()

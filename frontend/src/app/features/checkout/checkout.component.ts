@@ -112,6 +112,7 @@ export class CheckoutComponent implements OnInit {
       cantidad: item.cantidad,
       precio_unitario: this.cartService.getItemPrice(item),
       subtotal: this.cartService.getItemTotal(item),
+      origen: item.origen,
     }));
 
     const ordenData: OrdenCreate = {
@@ -123,7 +124,8 @@ export class CheckoutComponent implements OnInit {
       metodo_pago: 'stripe',
       items: items,
     };
-
+    console.log({ ordenData });
+    //TODO: Descomentar esto
     this.ordenService.crearOrden(ordenData).subscribe({
       next: (orden) => {
         const baseUrl = window.location.origin;

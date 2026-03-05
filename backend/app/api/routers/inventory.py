@@ -164,3 +164,36 @@ def delete_inventario(
         )
 
     return inventario_service.delete_inventario(db, inventario_id)
+
+
+@router.get("/producto/{producto_id}/analisis-morfologico")
+def get_inventario_quick_add(producto_id: UUID, db: Session = Depends(get_db)):
+    """Obtener inventario formateado para el componente QuickAdd modal de analisis"""
+
+    inventarios = inventario_service.get_inventario_by_producto(db, producto_id)
+
+    tallas_map = {}
+    colores_map = {}
+
+    for inv in inventarios:
+        stock_disponible = inv.stock - inv.stock_reservado
+
+        if inv.talla_id not in tallas_map:
+            tallas_map[inv.talla_id] = {
+                "id": str(inv.talla_id),
+                "nombre": inv.talla.nombre,
+                "stock": 0,
+            }
+        tallas_map[inv.talla_id]["stock"] += stock_disponible
+
+        if inv.color_id not in colores_map:
+            colores_map[inv.color_id] = {
+                "id": str(inv.color_id),
+                "nombre": inv.color.nombre,
+                "codigo_hex": inv.color.codigo_hexadecimal,
+            }
+
+    return {
+        "tallas_disponibles": list(tallas_map.values()),
+        "colores_disponibles": list(colores_map.values()),
+    }

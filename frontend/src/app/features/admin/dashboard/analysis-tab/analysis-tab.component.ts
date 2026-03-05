@@ -17,14 +17,14 @@ export class AnalysisTabComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private dashboardService = inject(DashboardService);
 
-  // Charts
   private conversionPorTipoChart?: Chart;
   private analisisPorMesChart?: Chart;
+  private funnelConversionChart?: Chart;
 
-  // Data
   topProductos = signal<any[]>([]);
   distribucionTipos = signal<any>(null);
   conversionPorTipo = signal<any>(null);
+  metricasConversion = signal<any>(null);
   cargando = signal(true);
 
   constructor() {
@@ -48,12 +48,15 @@ export class AnalysisTabComponent implements OnInit {
       distribucion: this.dashboardService.obtenerAnalisisPorTipo(),
       conversion: this.dashboardService.obtenerConversionPorTipo(),
       topProductos: this.dashboardService.obtenerProductosMasRecomendados(10),
+      metricas: this.dashboardService.obtenerMetricasConversionAnalisis(),
     }).subscribe({
       next: (datos) => {
         this.distribucionTipos.set(datos.distribucion);
         this.conversionPorTipo.set(datos.conversion);
         this.topProductos.set(datos.topProductos);
+        this.metricasConversion.set(datos.metricas);
 
+   
         if (isPlatformBrowser(this.platformId)) {
           setTimeout(() => {
             this.crearGraficos(datos);
@@ -72,6 +75,8 @@ export class AnalysisTabComponent implements OnInit {
   private crearGraficos(datos: any): void {
     this.crearConversionPorTipoChart(datos.conversion.labels, datos.conversion.valores);
     this.crearAnalisisPorMesChart(datos.distribucion.labels, datos.distribucion.valores);
+    console.log({ datos });
+    this.crearFunnelConversionChart(datos.metricas);
   }
 
   private crearConversionPorTipoChart(labels: string[], valores: number[]): void {
@@ -172,7 +177,58 @@ export class AnalysisTabComponent implements OnInit {
 
     this.analisisPorMesChart = new Chart(ctx, config);
   }
+  private crearFunnelConversionChart(metricas: any): void {
+    const ctx = document.getElementById('funnelConversionChart') as HTMLCanvasElement;
+    if (!ctx) return;
 
+    const config: ChartConfiguration<'bar'> = {
+      type: 'bar',
+      data: {
+        labels: ['Análisis', 'Al Carrito', 'Comprados'],
+        datasets: [
+          {
+            label: 'Cantidad',
+            data: [
+              metricas.total_analisis,
+              metricas.items_carrito_analisis,
+              metricas.items_vendidos_analisis,
+            ],
+            backgroundColor: ['#9CA8B8', '#D4A5A5', '#8B9B7A'],
+            borderRadius: 8,
+            barThickness: 60,
+          },
+        ],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#3E352F',
+            padding: 12,
+            callbacks: {
+              label: (ctx) => `${ctx.parsed.x} productos`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            grid: { color: '#F5EDE3' },
+            ticks: { color: '#8B7F76' },
+          },
+          y: {
+            grid: { display: false },
+            ticks: { color: '#8B7F76' },
+          },
+        },
+      },
+    };
+
+    this.funnelConversionChart = new Chart(ctx, config);
+  }
   async exportarPDF(): Promise<void> {
     if (typeof window === 'undefined') return;
 
@@ -211,11 +267,9 @@ export class AnalysisTabComponent implements OnInit {
       let heightLeft = imgHeight;
       let position = 0;
 
-      // Primera página
       pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
       heightLeft -= pdfHeight;
 
-      // Páginas adicionales si el contenido es muy largo
       while (heightLeft > 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
@@ -223,11 +277,9 @@ export class AnalysisTabComponent implements OnInit {
         heightLeft -= pdfHeight;
       }
 
-      // Cambiar el nombre según el tab
       pdf.save(`dashboard-analisis-ia-${new Date().toISOString().split('T')[0]}.pdf`);
     } catch (error) {
       console.error('Error al exportar PDF:', error);
-      
     }
   }
   calculateAverageConversion(): number {
@@ -238,7 +290,12 @@ export class AnalysisTabComponent implements OnInit {
     const sum = data.valores.reduce((a: any, b: any) => a + b, 0);
     return parseFloat((sum / data.valores.length).toFixed(1));
   }
-
+  formatCurrency(value: number): string {
+    return new Intl.NumberFormat('es-EC', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(value);
+  }
   getTotalAnalysis(): number {
     const data = this.distribucionTipos();
     if (!data?.valores || data.valores.length === 0) {

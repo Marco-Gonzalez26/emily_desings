@@ -3,9 +3,13 @@ from fastapi import HTTPException, status
 from uuid import uuid4, UUID
 from decimal import Decimal
 from typing import List, Optional
+
+import asyncio
 from datetime import datetime
 import stripe
 import os
+
+from app.services.email_service import send_order_confirmation_email
 
 from app.models.models import (
     Orden,
@@ -53,7 +57,7 @@ def create_orden(db: Session, orden_data: OrdenCreate, user: Usuario) -> Orden:
 
         subtotal_item = precio_unitario * item.cantidad
         subtotal += subtotal_item
-
+        print(f"----------item origen {item.origen} ----------------")
         items_db.append(
             OrdenItem(
                 producto_id=item.producto_id,
@@ -63,6 +67,7 @@ def create_orden(db: Session, orden_data: OrdenCreate, user: Usuario) -> Orden:
                 cantidad=item.cantidad,
                 precio_unitario=item.precio_unitario,
                 subtotal=item.subtotal,
+                origen=item.origen ,
             )
         )
 
@@ -208,7 +213,7 @@ def crear_stripe_checkout_session(
         )
 
 
-def confirmar_pago_stripe(db: Session, session_id: str, user: Usuario) -> Orden:
+async def confirmar_pago_stripe(db: Session, session_id: str, user: Usuario) -> Orden:
     """Confirmar el pago, actualizar orden y descontar stock"""
 
     try:
@@ -293,6 +298,33 @@ def confirmar_pago_stripe(db: Session, session_id: str, user: Usuario) -> Orden:
         # Un solo commit al final
         db.commit()
         db.refresh(orden)
+
+        try:
+            from app.services.email_service import send_order_confirmation_email
+
+            items_email = [
+                {
+                    "nombre_producto": item.nombre_producto,
+                    "cantidad": item.cantidad,
+                    "precio_unitario": float(item.precio_unitario),
+                    "subtotal": float(item.subtotal),
+                }
+                for item in orden.items
+            ]
+
+            # Ejecutar envío de email de forma asíncrona
+            asyncio.create_task(
+                send_order_confirmation_email(
+                    to_email=user.email,
+                    nombre_cliente=user.nombre_completo,
+                    numero_orden=orden.numero_orden,
+                    total=float(orden.total),
+                    items=items_email,
+                    direccion_envio=orden.direccion_envio,
+                )
+            )
+        except Exception as e:
+            print(f" ------ Error enviando email de confirmación: {str(e)} ------")
 
         return orden
 

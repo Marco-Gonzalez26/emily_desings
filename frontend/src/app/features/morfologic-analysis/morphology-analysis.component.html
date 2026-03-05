@@ -123,7 +123,7 @@
             (click)="fileInput.click()"
             class="inline-flex items-center px-6 py-2.5 border border-emily-taupe/30 rounded-lg text-sm font-medium text-emily-dark bg-emily-white hover:bg-emily-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emily-rose transition-colors"
           >
-            Examinar...
+            Examinar
           </button>
         </div>
 
@@ -235,7 +235,7 @@
               (click)="regenerarRecomendaciones()"
               class="text-sm text-emily-rose hover:text-emily-rose/80 font-medium transition-colors"
             >
-              🔄 Regenerar
+               Regenerar
             </button>
           </div>
         </div>
@@ -294,7 +294,7 @@
                   <div
                     class="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
                   >
-                    -{{ getDiscountPercent(producto.precio_descuento, producto.precio_regular) }}%
+                    -{{ getDiscountPercent(producto.precio_descuento, producto.precio_regular).toFixed(2) }}%
                   </div>
                 }
               </div>
@@ -359,12 +359,3 @@
   </app-quick-add-modal>
 }
 
-@if (productoParaAgregar()) {
-  <app-quick-add-modal
-    [producto]="productoParaAgregar()!"
-    [isOpen]="modalAbierto()"
-    (close)="onCloseModal()"
-    (addToCart)="onAddToCart($event)"
-  >
-  </app-quick-add-modal>
-}

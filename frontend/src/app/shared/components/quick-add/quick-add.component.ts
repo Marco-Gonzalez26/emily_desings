@@ -10,20 +10,19 @@ import { QuickAddData, QuickAddResult } from '@models/quick_add';
   styleUrl: './quick-add.component.css',
 })
 export class QuickAddModalComponent {
-  // Inputs
+
   producto = input.required<QuickAddData>();
   isOpen = input.required<boolean>();
 
-  // Outputs
+  
   close = output<void>();
   addToCart = output<QuickAddResult>();
 
-  // State
+
   tallaSeleccionada = signal<string | null>(null);
   colorSeleccionado = signal<string | null>(null);
   cantidad = signal<number>(1);
 
-  // Computed
   tallaInfo = computed(() => {
     const tallaId = this.tallaSeleccionada();
     if (!tallaId) return null;
@@ -48,7 +47,7 @@ export class QuickAddModalComponent {
     const descuento = this.producto().precio_descuento;
     const regular = this.producto().precio;
 
-    // Convertir string a number
+
     if (descuento) {
       return parseFloat(descuento);
     }
@@ -59,7 +58,7 @@ export class QuickAddModalComponent {
     return this.precioFinal() * this.cantidad();
   });
 
-  // Methods
+
   seleccionarTalla(tallaId: string): void {
     this.tallaSeleccionada.set(tallaId);
   }
@@ -94,7 +93,7 @@ export class QuickAddModalComponent {
   }
 
   cerrar(): void {
-    // Reset state
+
     this.tallaSeleccionada.set(null);
     this.colorSeleccionado.set(null);
     this.cantidad.set(1);

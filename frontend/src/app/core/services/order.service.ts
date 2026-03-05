@@ -19,6 +19,8 @@ export class OrdenService {
   constructor(private api: ApiService) {}
 
   crearOrden(data: OrdenCreate): Observable<Orden> {
+    console.log('ORDEN CREATE', { data });
+    
     return this.api.post<Orden>('/api/ordenes/', data);
   }
 
@@ -47,7 +49,6 @@ export class OrdenService {
     });
   }
 
-
   getAllOrders(filters?: OrderFilters): Observable<OrdersResponse> {
     const params = new URLSearchParams();
 
@@ -65,16 +66,13 @@ export class OrdenService {
     return this.api.get<OrdersResponse>(url);
   }
 
-
   getOrderById(id: string): Observable<Orden> {
     return this.api.get<Orden>(`/api/ordenes/admin/${id}`);
   }
 
-
   updateOrderStatus(id: string, data: OrderEstadoUpdate): Observable<Orden> {
     return this.api.put<Orden>(`/api/ordenes/admin/${id}/estado`, data);
   }
-
 
   getStats(): Observable<OrderStats> {
     return this.api.get<OrderStats>('/api/ordenes/admin/estadisticas/general');

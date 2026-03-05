@@ -243,12 +243,13 @@ export class ProductDetailComponent implements OnInit {
         talla_id: this.selectedTalla()!,
         color_id: this.selectedColor()!.id,
         cantidad: this.quantity(),
+        origen: 'catalogo',
       })
       .subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
-            summary: '¡Listo!',
+            summary: 'Listo',
             detail: 'Producto agregado al carrito',
           });
           this.quantity.set(1);

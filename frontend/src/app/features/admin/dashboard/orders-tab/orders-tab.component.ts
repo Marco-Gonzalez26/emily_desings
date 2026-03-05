@@ -75,7 +75,6 @@ export class OrdersTabComponent implements OnInit, OnDestroy {
       'Dic',
     ];
 
-    // Generar últimos 6 meses
     for (let i = 0; i < 6; i++) {
       const fecha = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
       const year = fecha.getFullYear();
@@ -125,10 +124,8 @@ export class OrdersTabComponent implements OnInit, OnDestroy {
     this.mesSeleccionado.set(mesSeleccionado);
 
     if (mesSeleccionado === 'todos') {
-      // Recargar gráfico con últimos 6 meses
       this.cargarDatos();
     } else {
-      // Filtrar por mes específico
       const mesData = this.mesesDisponibles().find((m) => m.value === mesSeleccionado);
       if (mesData) {
         this.cargarDatosMesEspecifico(mesData.year, mesData.month);
@@ -141,7 +138,6 @@ export class OrdersTabComponent implements OnInit, OnDestroy {
 
     this.dashboardService.obtenerVentasMesEspecifico(year, month).subscribe({
       next: (datos) => {
-        // Actualizar gráfico con un solo mes
         if (isPlatformBrowser(this.platformId)) {
           this.actualizarGraficoMesEspecifico(datos.mes, datos.total);
         }
@@ -158,7 +154,6 @@ export class OrdersTabComponent implements OnInit, OnDestroy {
     const ctx = document.getElementById('ventasMesChart') as HTMLCanvasElement;
     if (!ctx) return;
 
-    // Destruir gráfico anterior si existe
     if (this.ventasMesChart) {
       this.ventasMesChart.destroy();
     }
@@ -212,15 +207,15 @@ export class OrdersTabComponent implements OnInit, OnDestroy {
   }
 
   private actualizarGraficoMesEspecifico(label: string, valor: number): void {
+  
     if (this.ventasMesChart) {
-      // Actualizar datos del gráfico
-      this.ventasMesChart.data.labels = [label];
-      this.ventasMesChart.data.datasets[0].data = [valor];
-      this.ventasMesChart.update();
-    } else {
-      // Crear nuevo gráfico si no existe
-      this.crearVentasMesChart([label], [valor]);
+      this.ventasMesChart.destroy();
+      this.ventasMesChart = undefined;
     }
+
+    setTimeout(() => {
+      this.crearVentasMesChart([label], [valor]);
+    }, 100);
   }
 
   async exportarPDF(): Promise<void> {
@@ -279,7 +274,9 @@ export class OrdersTabComponent implements OnInit, OnDestroy {
       console.error('Error al exportar PDF:', error);
     }
   }
-
+  calcularProgreso(valor: number, multiplicador: number): number {
+    return Math.min((valor || 0) * multiplicador, 100);
+  }
   ngOnDestroy(): void {
     this.ventasMesChart?.destroy();
   }

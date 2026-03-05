@@ -116,7 +116,20 @@ export class DashboardService {
   /*
     Dashboard Analisis IA
   */
-
+  obtenerMetricasConversionAnalisis(): Observable<{
+    total_analisis: number;
+    items_carrito_analisis: number;
+    items_vendidos_analisis: number;
+    ordenes_con_analisis: number;
+    analisis_con_compra: number;
+    ingresos_analisis: number;
+    tasa_analisis_a_carrito: number;
+    tasa_analisis_a_compra: number;
+    tasa_carrito_a_compra: number;
+    ticket_promedio_analisis: number;
+  }> {
+    return this.api.get<any>('/api/dashboard/analisis/conversion-ordenes');
+  }
   obtenerConversionPorTipo(): Observable<ConversionPorTipo> {
     return this.api.get<ConversionPorTipo>('/api/dashboard/analisis/conversion-por-tipo');
   }

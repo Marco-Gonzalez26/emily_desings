@@ -18,6 +18,8 @@ class AddItemRequest(BaseModel):
     color_id: UUID
     cantidad: int = Field(default=1, gt=0)
 
+    origen: str = Field(default="catalogo")
+
 
 class UpdateItemRequest(BaseModel):
     cantidad: int = Field(..., gt=0)
@@ -46,6 +48,7 @@ def add_item(
         data.talla_id,
         data.color_id,
         data.cantidad,
+        data.origen,
     )
 
 

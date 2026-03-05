@@ -56,6 +56,7 @@ def create_user(db: Session, user: UsuarioCreate) -> Usuario:
     new_user = Usuario(
         email=user.email,
         password_hash=hashed_password,
+        cedula_ruc=user.cedula_ruc,
         nombre_completo=user.nombre_completo,
         telefono=user.telefono,
         direccion=user.direccion,
@@ -136,3 +137,28 @@ def create_user_token(user: Usuario) -> dict:
     )
 
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+def change_password(
+    db: Session, email: str, password_actual: str, password_nueva: str
+) -> bool:
+    """Cambiar contraseña del usuario"""
+
+    usuario = db.query(Usuario).filter(Usuario.email == email).first()
+
+    if not usuario:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado"
+        )
+
+    if not verify_password(password_actual, usuario.password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Contraseña actual incorrecta",
+        )
+
+    usuario.password = get_password_hash(password_nueva)
+
+    db.commit()
+
+    return True

@@ -34,6 +34,8 @@ export class CartService {
   }
 
   addItem(data: AddItemRequest): Observable<Cart> {
+
+    console.log("AddItem data",{data});
     return this.api.post<Cart>('/api/carrito/items', data).pipe(tap((cart) => this.cart.set(cart)));
   }
 

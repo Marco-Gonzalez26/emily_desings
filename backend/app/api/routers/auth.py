@@ -4,7 +4,13 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 
 from app.db.config import get_db
-from app.schemas.schemas import UsuarioCreate, UsuarioResponse, UserLogin, Token
+from app.schemas.schemas import (
+    UsuarioCreate,
+    UsuarioResponse,
+    UserLogin,
+    Token,
+    CambiarPasswordRequest,
+)
 from app.services import auth_service
 from app.utils.auth_security import decode_access_token
 
@@ -147,3 +153,17 @@ def logout():
 
 
 print("AUTH ROUTER LOADED:", router.routes)
+
+
+@router.post("/reestablecer-contraseña")
+def cambiar_password(data: CambiarPasswordRequest, db: Session = Depends(get_db)):
+    """Cambiar contraseña (requiere contraseña actual)"""
+
+    auth_service.cambiar_password(
+        db=db,
+        email=data.email,
+        password_actual=data.password_actual,
+        password_nueva=data.password_nueva,
+    )
+
+    return {"message": "Contraseña actualizada exitosamente"}

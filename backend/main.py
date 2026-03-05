@@ -14,6 +14,8 @@ from app.api.routers import (
     analysis,
     dashboard,
     product_images,
+    user,
+    reports,
 )
 
 from app.models import (
@@ -83,6 +85,9 @@ app.include_router(inventory.router)
 app.include_router(analysis.router)
 app.include_router(dashboard.router)
 app.include_router(product_images.router)
+app.include_router(user.router)
+app.include_router(reports.router)
+
 
 @app.on_event("startup")
 async def startup():

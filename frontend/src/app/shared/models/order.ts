@@ -13,7 +13,7 @@ export interface OrdenItem {
   cantidad: number;
   precio_unitario: number;
   subtotal: number;
-
+  origen?: string;
   producto?: Product;
   talla?: Talla;
   color?: Color;
@@ -26,6 +26,7 @@ export interface OrdenCreate {
   impuestos: number;
   total: number;
   metodo_pago: string;
+
   items: OrdenItem[];
 }
 

@@ -30,6 +30,12 @@ import { AdminInventoryListComponent } from './features/admin/inventories/admin-
 import { AdminProductInventoryComponent } from './features/admin/inventories/admin-product-inventory/admin-product-inventory.component';
 import { AdminOrdersListComponent } from './features/admin/orders/admin-orders-list/admin-orders-list.component';
 import { AdminOrderDetailComponent } from './features/admin/orders/admin-order-detail/admin-order-detail.component';
+import { AdminUserFormComponent } from './features/admin/users/admin-user-form/admin-user-form.component';
+import { ChangePasswordComponent } from './features/auth/change-password/change-password.component';
+import { ProfileComponent } from './features/profile/profile.component';
+import { AdminUsersListComponent } from './features/admin/users/admin-users-list/admin-users-list.component';
+import { AdminUserDetailComponent } from './features/admin/users/admin-user-detail/admin-user-detail.component';
+import { ReportsComponent } from './features/admin/reports/reports.component';
 
 export const routes: Routes = [
   {
@@ -58,6 +64,15 @@ export const routes: Routes = [
     path: 'crear-cuenta',
     component: AuthLayoutComponent,
     children: [{ path: '', component: RegisterComponent }],
+  },
+  {
+    path: 'cambiar-contraseña',
+    component: ChangePasswordComponent,
+  },
+  {
+    path: 'perfil',
+    component: ProfileComponent,
+    canActivate: [authGuard],
   },
   {
     path: 'admin',
@@ -142,6 +157,19 @@ export const routes: Routes = [
           { path: '', component: AdminOrdersListComponent },
           { path: ':id', component: AdminOrderDetailComponent },
         ],
+      },
+      {
+        path: 'usuarios',
+        children: [
+          { path: '', component: AdminUsersListComponent },
+          { path: 'crear', component: AdminUserFormComponent },
+          { path: 'editar/:id', component: AdminUserFormComponent },
+          { path: ':id', component: AdminUserDetailComponent },
+        ],
+      },
+      {
+        path: 'reportes',
+        component: ReportsComponent,
       },
     ],
   },

@@ -5,7 +5,7 @@ from uuid import UUID
 import random
 
 from app.models.models import ReglasRecomendacion, AnalisisMorfologico
-from app.models.models import Producto, Categoria
+from app.models.models import Producto, Categoria, Inventario
 
 
 def generar_recomendaciones_inteligentes(
@@ -50,13 +50,15 @@ def generar_recomendaciones_inteligentes(
         query = (
             db.query(Producto)
             .join(Categoria)
+            .join(Inventario)
             .filter(
                 Producto.categoria_id == regla.categoria_id,
                 Producto.activo == True,
+                Inventario.stock > Inventario.stock_reservado,
             )
+            .distinct()
         )
 
-        # Excluir productos ya vistos
         if productos_ya_vistos:
             query = query.filter(~Producto.id.in_(productos_ya_vistos))
 
@@ -71,8 +73,8 @@ def generar_recomendaciones_inteligentes(
         # Ordenar por score y tomar los mejores de esta categoría
         productos_scored.sort(key=lambda x: x[1], reverse=True)
 
-        # Tomar 2-3 productos por categoría según prioridad
-        cantidad = 3 if regla.prioridad == 1 else 2
+        # Tomar 1 producto por categoria
+        cantidad = 1
         productos_finales.extend([p for p, _ in productos_scored[:cantidad]])
 
         if len(productos_finales) >= limite:
@@ -114,10 +116,16 @@ def _calcular_score_producto(producto: Producto, regla: ReglasRecomendacion) -> 
     if producto.es_nuevo:
         score += 20
     stock_total = sum(inv.stock for inv in producto.inventarios)
-    if stock_total > 0:
+
+    stock_disponible = sum(
+        inv.stock - inv.stock_reservado for inv in producto.inventarios
+    )
+
+    if stock_disponible > 0:
         score += 15
-        if stock_total > 10:
+        if stock_disponible > 10:
             score += 10
+
     precio = float(producto.precio_descuento or producto.precio_regular)
     if 30 <= precio <= 80:
         score += 10
@@ -141,7 +149,9 @@ def _producto_a_dict(producto: Producto) -> Dict:
             if img_principal
             else producto.imagenes[0].url_imagen
         )
-
+    stock_disponible = sum(
+        inv.stock - inv.stock_reservado for inv in producto.inventarios
+    )
     return {
         "id": str(producto.id),
         "nombre": producto.nombre,
@@ -156,6 +166,7 @@ def _producto_a_dict(producto: Producto) -> Dict:
         "es_oferta": producto.es_oferta,
         "es_nuevo": producto.es_nuevo,
         "es_destacado": producto.es_destacado,
+        "stock_disponible": stock_disponible,
     }
 
 

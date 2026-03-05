@@ -9,6 +9,7 @@ import { AnalisisMorfologico, ProductoRecomendado, TIPOS_CUERPO } from '@models/
 import { QuickAddData, QuickAddResult } from '@models/quick_add';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { jamUpload } from '@ng-icons/jam-icons';
+import { InventarioService } from '@app/core/services/inventory.service';
 type EstadoAnalisis = 'inicial' | 'cargando' | 'resultado' | 'error';
 
 @Component({
@@ -20,9 +21,9 @@ type EstadoAnalisis = 'inicial' | 'cargando' | 'resultado' | 'error';
 })
 export class MorphologyAnalysisComponent {
   private analisisService = inject(MorphologyAnalysisService);
+  private inventoryService = inject(InventarioService);
   private cartService = inject(CartService);
   private router = inject(Router);
-
 
   estado = signal<EstadoAnalisis>('inicial');
   imagenSeleccionada = signal<File | null>(null);
@@ -31,11 +32,9 @@ export class MorphologyAnalysisComponent {
   mensajeError = signal<string>('');
   porcentajeProgreso = signal<number>(0);
 
-  // Quick Add Modal
   modalAbierto = signal(false);
   productoParaAgregar = signal<QuickAddData | null>(null);
 
-  // Computed signals
   estaCargando = computed(() => this.estado() === 'cargando');
   tieneResultado = computed(() => this.estado() === 'resultado');
   tieneError = computed(() => this.estado() === 'error');
@@ -45,7 +44,6 @@ export class MorphologyAnalysisComponent {
     return tipo ? TIPOS_CUERPO[tipo] : null;
   });
 
-  // Drag & Drop
   isDragging = signal(false);
 
   onDragOver(event: DragEvent): void {
@@ -71,7 +69,6 @@ export class MorphologyAnalysisComponent {
     }
   }
 
-  // File input change
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -79,16 +76,13 @@ export class MorphologyAnalysisComponent {
     }
   }
 
-  // Procesar archivo seleccionado
   private procesarArchivo(file: File): void {
-    // Validar que sea imagen
     if (!file.type.startsWith('image/')) {
       this.mensajeError.set('Por favor selecciona una imagen válida (JPG, PNG, etc.)');
       this.estado.set('error');
       return;
     }
 
-    // Validar tamaño (máx 10MB)
     if (file.size > 10 * 1024 * 1024) {
       this.mensajeError.set('La imagen es demasiado grande. Máximo 10MB.');
       this.estado.set('error');
@@ -101,7 +95,6 @@ export class MorphologyAnalysisComponent {
     this.mensajeError.set('');
   }
 
-  // Crear preview de la imagen
   private crearPreview(file: File): void {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -110,7 +103,6 @@ export class MorphologyAnalysisComponent {
     reader.readAsDataURL(file);
   }
 
-  // Analizar imagen
   analizarImagen(): void {
     const imagen = this.imagenSeleccionada();
 
@@ -124,7 +116,6 @@ export class MorphologyAnalysisComponent {
     this.porcentajeProgreso.set(0);
     this.mensajeError.set('');
 
-    // Simular progreso
     const intervalo = setInterval(() => {
       const progreso = this.porcentajeProgreso();
       if (progreso < 90) {
@@ -139,6 +130,7 @@ export class MorphologyAnalysisComponent {
 
         setTimeout(() => {
           this.resultado.set(resultado);
+          console.log('Resultado analizado:', { resultado });
           this.estado.set('resultado');
 
           // Scroll suave a resultados
@@ -173,7 +165,6 @@ export class MorphologyAnalysisComponent {
     });
   }
 
-  // Reiniciar análisis
   nuevoAnalisis(): void {
     this.estado.set('inicial');
     this.imagenSeleccionada.set(null);
@@ -183,7 +174,6 @@ export class MorphologyAnalysisComponent {
     this.porcentajeProgreso.set(0);
   }
 
-  // Regenerar recomendaciones
   regenerarRecomendaciones(): void {
     const analisisId = this.resultado()?.analisis_id;
 
@@ -206,6 +196,7 @@ export class MorphologyAnalysisComponent {
 
         setTimeout(() => {
           this.resultado.set(resultado);
+          console.log('Resultado regenerado recomendaciones:', { resultado });
           this.estado.set('resultado');
         }, 300);
       },
@@ -218,9 +209,7 @@ export class MorphologyAnalysisComponent {
     });
   }
 
-  // Navegar a producto
   verProducto(producto: ProductoRecomendado): void {
-    // Registrar interacción de click
     this.analisisService
       .registrarInteraccion({
         recomendacion_id: producto.id,
@@ -230,44 +219,41 @@ export class MorphologyAnalysisComponent {
         error: (err) => console.warn('No se pudo registrar interacción:', err),
       });
 
-    // Navegar a detalle del producto
     this.router.navigate(['/productos', producto.id]);
   }
 
-  // Abrir modal de quick add
   agregarAlCarrito(producto: ProductoRecomendado, event: Event): void {
     event.stopPropagation();
-    console.log('🛒 agregarAlCarrito llamado', producto);
+    console.log(' agregarAlCarrito ', producto);
 
-    this.analisisService.obtenerVariantesProducto(producto.id).subscribe({
-      next: (variantes) => {
-        console.log('✅ Variantes obtenidas:', variantes);
-        this.productoParaAgregar.set(variantes);
-        this.modalAbierto.set(true);
-      },
-      error: (error) => {
-        console.error('❌ Error obteniendo variantes:', error);
+    this.inventoryService.obtenerInventarioQuickAdd(producto.id).subscribe({
+      next: (inventario) => {
+        console.log(' Inventario obtenido:', inventario);
 
-        // Fallback con datos de prueba
         const quickAddData: QuickAddData = {
           producto_id: producto.id,
           nombre: producto.nombre,
           imagen: producto.imagen_principal || '',
           precio: producto.precio_regular,
-          precio_descuento: producto.precio_descuento || '0',
-          tallas_disponibles: [{ id: 'default', nombre: 'Única', stock: 10 }],
-          colores_disponibles: [{ id: 'default', nombre: 'Original', codigo_hex: '#cccccc' }],
+          precio_descuento: producto.precio_descuento || '',
+          tallas_disponibles: inventario.tallas_disponibles,
+          colores_disponibles: inventario.colores_disponibles,
         };
 
-        console.log('📦 Usando fallback:', quickAddData);
+        console.log(' Datos preparado:', quickAddData);
         this.productoParaAgregar.set(quickAddData);
         this.modalAbierto.set(true);
+      },
+      error: (error) => {
+        console.error(' Error obteniendo inventario:', error);
+
+        // Mostrar mensaje al usuario
+        this.mostrarNotificacion('No se pudo cargar la información del producto', 'error');
       },
     });
   }
 
   onAddToCart(resultado: QuickAddResult): void {
-    // Registrar interacción
     this.analisisService
       .registrarInteraccion({
         recomendacion_id: resultado.producto_id,
@@ -277,13 +263,13 @@ export class MorphologyAnalysisComponent {
         error: (err) => console.warn('No se pudo registrar interacción:', err),
       });
 
-    // Agregar al carrito
     this.cartService
       .addItem({
         producto_id: resultado.producto_id,
         talla_id: resultado.talla_id,
         color_id: resultado.color_id,
         cantidad: resultado.cantidad,
+        origen: 'analisis',
       })
       .subscribe({
         next: () => {
@@ -303,7 +289,6 @@ export class MorphologyAnalysisComponent {
       });
   }
 
-  // Cerrar modal
   onCloseModal(): void {
     this.modalAbierto.set(false);
     this.productoParaAgregar.set(null);

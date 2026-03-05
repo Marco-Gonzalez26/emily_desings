@@ -7,7 +7,7 @@ from app.models.models import Carrito, CarritoItem, Producto, Inventario
 
 def get_or_create_carrito(db: Session, usuario_id: UUID) -> Carrito:
     """Obtener carrito activo del usuario o crear uno nuevo"""
-    carrito = (
+    carrito= (
         db.query(Carrito)
         .options(
             joinedload(Carrito.items)
@@ -36,8 +36,10 @@ def add_item(
     talla_id: UUID,
     color_id: UUID,
     cantidad: int,
+    origen: str = "catalogo",
 ) -> Carrito:
     """Agregar item al carrito y reservar stock"""
+
 
     producto = (
         db.query(Producto)
@@ -108,8 +110,10 @@ def add_item(
             color_id=color_id,
             cantidad=cantidad,
             precio_unitario=precio,
+            origen=origen,
         )
         db.add(new_item)
+        print(new_item)
         inventario.stock_reservado += cantidad
 
     db.commit()

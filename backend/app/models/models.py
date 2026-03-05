@@ -428,8 +428,6 @@ class ImagenProducto(Base):
     producto = relationship("Producto", back_populates="imagenes")
 
 
-
-
 class ProductoEtiquetaMorfologica(Base):
     """Etiquetas morfológicas para recomendación de productos"""
 
@@ -541,6 +539,7 @@ class CarritoItem(Base):
     created_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
     updated_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
 
+    origen = Column(String(50), nullable=False)
     __table_args__ = (
         CheckConstraint("cantidad > 0", name="carrito_items_cantidad_check"),
     )
@@ -613,6 +612,8 @@ class OrdenItem(Base):
     precio_unitario = Column(Numeric(10, 2), nullable=False)
     subtotal = Column(Numeric(10, 2), nullable=False)
     created_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
+
+    origen = Column(String(50), nullable=False)
 
     __table_args__ = (
         CheckConstraint("cantidad > 0", name="orden_items_cantidad_check"),

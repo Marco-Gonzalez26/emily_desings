@@ -45,13 +45,13 @@ def crear_checkout_session(
 
 
 @router.post("/confirmar-pago/{session_id}", response_model=OrdenResponse)
-def confirmar_pago(
+async def confirmar_pago(
     session_id: str,
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(get_current_user),
 ):
     """Confirmar pago de Stripe y actualizar orden"""
-    return order_service.confirmar_pago_stripe(db, session_id, current_user)
+    return await order_service.confirmar_pago_stripe(db, session_id, current_user)
 
 
 @router.get("/mias", response_model=List[OrdenResponse])
