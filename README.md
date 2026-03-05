@@ -66,7 +66,7 @@ mejor se adapten a sus características físicas y preferencias personales.
 
 ```bash
 cd backend
-pip install
+pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
@@ -94,3 +94,4 @@ emily-designs/
 - [x] Implementar autenticación con JWT
 - [x] Utiliza NG-ICONS para los iconos de la aplicación
 - [x] Moficar la página de análisis morfológico para utilizar el Backend
+
